@@ -1,22 +1,46 @@
-// Updated CareerRoadmaps.js component
-"use client"
-import React, { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { CheckCircle, Circle, Clock, BookOpen, Star, ArrowRight, Target, Trophy, Sparkles, ChevronDown, ChevronUp, ExternalLink, Calendar } from 'lucide-react';
-import { careerRoadmaps } from '@/data/mockData';
-import useProgressStore from '@/lib/store/progressStore';
+// Updated CareerRoadmaps.js component with DB integration
+"use client";
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
+import {
+  CheckCircle,
+  Circle,
+  Clock,
+  BookOpen,
+  Star,
+  ArrowRight,
+  Target,
+  Trophy,
+  Sparkles,
+  ChevronDown,
+  ChevronUp,
+  ExternalLink,
+  Calendar,
+} from "lucide-react";
+import { careerRoadmaps } from "@/data/mockData";
+import useProgressStore from "@/lib/store/progressStore";
 
 const CareerRoadmaps = () => {
   const router = useRouter();
+  const { user } = useUser();
   const [selectedRoadmap, setSelectedRoadmap] = useState(careerRoadmaps[0]);
   const [expandedWeek, setExpandedWeek] = useState(null);
   const [showCompletion, setShowCompletion] = useState(false);
   const [animatingWeek, setAnimatingWeek] = useState(null);
   const [isHydrated, setIsHydrated] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     setIsHydrated(true);
   }, []);
+
+  // Load progress from database when component mounts
+  useEffect(() => {
+    if (user?.id) {
+      loadUserProgress();
+    }
+  }, [user?.id]);
 
   // Add this new useEffect after the existing one
   useEffect(() => {
@@ -26,34 +50,120 @@ const CareerRoadmaps = () => {
     return unsubscribe;
   }, []);
 
-  const { toggleWeekCompletion, getWeekProgress, getRoadmapProgress, _hasHydrated } = useProgressStore();
+  const {
+    toggleWeekCompletion,
+    getWeekProgress,
+    getRoadmapProgress,
+    _hasHydrated,
+    setRoadmapProgress,
+  } = useProgressStore();
+
+  // Load user progress from database
+  const loadUserProgress = async () => {
+    try {
+      const response = await fetch("/api/user-progress");
+      if (response.ok) {
+        const data = await response.json();
+        if (data.roadmapProgress) {
+          // Convert the database format to Zustand store format
+          Object.entries(data.roadmapProgress).forEach(
+            ([roadmapKey, progress]) => {
+              setRoadmapProgress(roadmapKey, progress);
+            }
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Error loading user progress:", error);
+    }
+  };
+
+  // Save progress to database
+  const saveProgressToDatabase = async (
+    roadmapName,
+    weekIndex,
+    isCompleted
+  ) => {
+    if (!user?.id) return;
+
+    setIsUpdating(true);
+    try {
+      const response = await fetch("/api/user-progress", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          roadmapName,
+          weekIndex,
+          isCompleted,
+          completedAt: isCompleted ? new Date().toISOString() : null,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save progress");
+      }
+
+      const result = await response.json();
+      console.log("Progress saved:", result);
+    } catch (error) {
+      console.error("Error saving progress:", error);
+      // Optionally show error toast/notification
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   // Get progress data
-  const roadmapProgress = (isHydrated && _hasHydrated) ? getRoadmapProgress(selectedRoadmap.role, selectedRoadmap.weeks.length) : { completed: 0, total: selectedRoadmap.weeks.length, percentage: 0 };
+  const roadmapProgress =
+    isHydrated && _hasHydrated
+      ? getRoadmapProgress(selectedRoadmap.role, selectedRoadmap.weeks.length)
+      : { completed: 0, total: selectedRoadmap.weeks.length, percentage: 0 };
   const progressPercentage = roadmapProgress.percentage;
 
   const getDifficultyColor = (difficulty) => {
     switch (difficulty) {
-      case 'Beginner': return 'text-green-400 bg-green-900/30 border-green-500/20';
-      case 'Intermediate': return 'text-yellow-400 bg-yellow-900/30 border-yellow-500/20';
-      case 'Advanced': return 'text-red-400 bg-red-900/30 border-red-500/20';
-      default: return 'text-gray-400 bg-gray-800/30 border-gray-600/20';
+      case "Beginner":
+        return "text-green-400 bg-green-900/30 border-green-500/20";
+      case "Intermediate":
+        return "text-yellow-400 bg-yellow-900/30 border-yellow-500/20";
+      case "Advanced":
+        return "text-red-400 bg-red-900/30 border-red-500/20";
+      default:
+        return "text-gray-400 bg-gray-800/30 border-gray-600/20";
     }
   };
 
-  // Handle completion toggle
-  const handleToggleCompletion = (weekIndex) => {
-    console.log('Toggling week completion:', weekIndex + 1);
-    
-    // Update Zustand store
+  // Handle completion toggle with database save
+  const handleToggleCompletion = async (weekIndex) => {
+    if (isUpdating) return; // Prevent double-clicks during save
+
+    console.log("Toggling week completion:", weekIndex + 1);
+
+    // Get current state to determine if we're completing or uncompleting
+    const currentWeekProgress = getWeekProgress(selectedRoadmap.role, weekIndex);
+    const willBeCompleted = !currentWeekProgress.completed;
+
+    // Update Zustand store immediately for UI responsiveness
     toggleWeekCompletion(selectedRoadmap.role, weekIndex);
-    
+
+    // Save to database
+    await saveProgressToDatabase(
+      selectedRoadmap.role,
+      weekIndex,
+      willBeCompleted
+    );
+
     // Animation
     setAnimatingWeek(weekIndex);
     setTimeout(() => setAnimatingWeek(null), 600);
-    
+
     // Check if roadmap completed
-    const newProgress = getRoadmapProgress(selectedRoadmap.role, selectedRoadmap.weeks.length);
+    const newProgress = getRoadmapProgress(
+      selectedRoadmap.role,
+      selectedRoadmap.weeks.length
+    );
     if (newProgress.percentage === 100 && !showCompletion) {
       setTimeout(() => setShowCompletion(true), 800);
     }
@@ -79,7 +189,7 @@ const CareerRoadmaps = () => {
               left: `${Math.random() * 400 - 200}px`,
               top: `${Math.random() * 400 - 200}px`,
               animationDelay: `${Math.random() * 2}s`,
-              animationDuration: `${1 + Math.random()}s`
+              animationDuration: `${1 + Math.random()}s`,
             }}
           />
         ))}
@@ -91,17 +201,23 @@ const CareerRoadmaps = () => {
               left: `${Math.random() * 300 - 150}px`,
               top: `${Math.random() * 300 - 150}px`,
               animationDelay: `${Math.random() * 1.5}s`,
-              animationDuration: `${0.8 + Math.random()}s`
+              animationDuration: `${0.8 + Math.random()}s`,
             }}
           />
         ))}
         <div className="bg-gradient-to-br from-purple-900 via-blue-900 to-green-900 p-8 rounded-2xl shadow-2xl border border-yellow-400/50 text-center transform animate-bounce">
           <Trophy className="w-16 h-16 text-yellow-400 mx-auto mb-4 animate-spin" />
-          <h2 className="text-3xl font-bold text-white mb-2">Congratulations! 🎉</h2>
-          <p className="text-yellow-100 text-lg mb-4">You've completed the {selectedRoadmap.role} roadmap!</p>
+          <h2 className="text-3xl font-bold text-white mb-2">
+            Congratulations! 🎉
+          </h2>
+          <p className="text-yellow-100 text-lg mb-4">
+            You've completed the {selectedRoadmap.role} roadmap!
+          </p>
           <div className="flex items-center justify-center space-x-2 mb-6">
             <Sparkles className="w-6 h-6 text-yellow-400 animate-pulse" />
-            <span className="text-2xl font-bold text-yellow-400">100% Complete</span>
+            <span className="text-2xl font-bold text-yellow-400">
+              100% Complete
+            </span>
             <Sparkles className="w-6 h-6 text-yellow-400 animate-pulse" />
           </div>
           <button
@@ -122,7 +238,15 @@ const CareerRoadmaps = () => {
           <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent mb-2">
             Career Roadmaps
           </h1>
-          <p className="text-gray-300 text-lg">Structured learning paths to achieve your career goals</p>
+          <p className="text-gray-300 text-lg">
+            Structured learning paths to achieve your career goals
+          </p>
+          {user && (
+            <p className="text-sm text-gray-400 mt-2">
+              Welcome back, {user.firstName || user.username}! Your progress is
+              automatically saved.
+            </p>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -130,35 +254,56 @@ const CareerRoadmaps = () => {
           <div className="lg:col-span-1">
             <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-2xl border border-gray-700/50 overflow-hidden">
               <div className="p-6 border-b border-gray-700/50 bg-gradient-to-r from-blue-900/20 to-purple-900/20">
-                <h2 className="text-xl font-semibold text-white mb-2">Choose Your Path</h2>
-                <p className="text-gray-300 text-sm">Select a career roadmap to get started</p>
+                <h2 className="text-xl font-semibold text-white mb-2">
+                  Choose Your Path
+                </h2>
+                <p className="text-gray-300 text-sm">
+                  Select a career roadmap to get started
+                </p>
               </div>
               <div
                 className="p-6 space-y-4 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800"
                 style={{ maxHeight: "100%", overflowY: "auto" }}
               >
                 {careerRoadmaps.map((roadmap, index) => {
-                  const roadmapProg = (isHydrated && _hasHydrated) ? getRoadmapProgress(roadmap.role, roadmap.weeks.length) : { completed: 0, total: roadmap.weeks.length, percentage: 0 };
+                  const roadmapProg =
+                    isHydrated && _hasHydrated
+                      ? getRoadmapProgress(roadmap.role, roadmap.weeks.length)
+                      : {
+                          completed: 0,
+                          total: roadmap.weeks.length,
+                          percentage: 0,
+                        };
                   return (
                     <button
                       key={index}
                       onClick={() => setSelectedRoadmap(roadmap)}
                       className={`w-full p-4 rounded-lg border-2 transition-all duration-300 text-left transform hover:scale-[1.02] ${
                         selectedRoadmap.role === roadmap.role
-                          ? 'border-blue-500 bg-blue-900/30 shadow-lg shadow-blue-500/20'
-                          : 'border-gray-600/50 bg-gray-700/30 hover:border-blue-400 hover:bg-blue-900/20 hover:shadow-lg'
+                          ? "border-blue-500 bg-blue-900/30 shadow-lg shadow-blue-500/20"
+                          : "border-gray-600/50 bg-gray-700/30 hover:border-blue-400 hover:bg-blue-900/20 hover:shadow-lg"
                       }`}
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <h3 className="font-semibold text-white mb-1">{roadmap.role}</h3>
-                          <p className="text-sm text-gray-300 mb-3">{roadmap.description}</p>
+                          <h3 className="font-semibold text-white mb-1">
+                            {roadmap.role}
+                          </h3>
+                          <p className="text-sm text-gray-300 mb-3">
+                            {roadmap.description}
+                          </p>
                           <div className="flex items-center space-x-4">
                             <div className="flex items-center space-x-2">
                               <Clock className="w-4 h-4 text-cyan-400" />
-                              <span className="text-sm text-gray-300">{roadmap.duration}</span>
+                              <span className="text-sm text-gray-300">
+                                {roadmap.duration}
+                              </span>
                             </div>
-                            <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getDifficultyColor(roadmap.difficulty)}`}>
+                            <span
+                              className={`px-3 py-1 rounded-full text-xs font-medium border ${getDifficultyColor(
+                                roadmap.difficulty
+                              )}`}
+                            >
                               {roadmap.difficulty}
                             </span>
                             <span className="text-xs text-blue-400 font-medium">
@@ -166,9 +311,13 @@ const CareerRoadmaps = () => {
                             </span>
                           </div>
                         </div>
-                        <ArrowRight className={`w-5 h-5 mt-1 transition-transform duration-300 ${
-                          selectedRoadmap.role === roadmap.role ? 'rotate-90 text-blue-400' : 'text-gray-400'
-                        }`} />
+                        <ArrowRight
+                          className={`w-5 h-5 mt-1 transition-transform duration-300 ${
+                            selectedRoadmap.role === roadmap.role
+                              ? "rotate-90 text-blue-400"
+                              : "text-gray-400"
+                          }`}
+                        />
                       </div>
                     </button>
                   );
@@ -183,43 +332,68 @@ const CareerRoadmaps = () => {
               <div className="p-6 border-b border-gray-700/50 bg-gradient-to-r from-blue-900/30 to-purple-900/30">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <h2 className="text-3xl font-bold text-white mb-2">{selectedRoadmap.role}</h2>
-                    <p className="text-gray-300 text-lg">{selectedRoadmap.description}</p>
+                    <h2 className="text-3xl font-bold text-white mb-2">
+                      {selectedRoadmap.role}
+                    </h2>
+                    <p className="text-gray-300 text-lg">
+                      {selectedRoadmap.description}
+                    </p>
                   </div>
                   <div className="text-right">
-                    <div className={`text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent transition-all duration-500 ${
-                      progressPercentage === 100 ? 'animate-pulse scale-110' : ''
-                    }`}>
+                    <div
+                      className={`text-4xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent transition-all duration-500 ${
+                        progressPercentage === 100
+                          ? "animate-pulse scale-110"
+                          : ""
+                      }`}
+                    >
                       {Math.round(progressPercentage)}%
                     </div>
                     <div className="text-sm text-gray-300">Complete</div>
+                    {isUpdating && (
+                      <div className="text-xs text-blue-400 animate-pulse mt-1">
+                        Saving...
+                      </div>
+                    )}
                   </div>
                 </div>
                 <div className="w-full bg-gray-700 rounded-full h-3 shadow-inner">
-                  <div 
+                  <div
                     className={`bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 h-3 rounded-full transition-all duration-1000 shadow-lg ${
-                      progressPercentage === 100 ? 'animate-pulse shadow-cyan-500/50' : ''
+                      progressPercentage === 100
+                        ? "animate-pulse shadow-cyan-500/50"
+                        : ""
                     }`}
                     style={{ width: `${progressPercentage}%` }}
                   ></div>
                 </div>
                 <div className="flex justify-between text-sm text-gray-300 mt-3">
-                  <span className="font-medium">{roadmapProgress.completed} of {selectedRoadmap.weeks.length} weeks completed</span>
+                  <span className="font-medium">
+                    {roadmapProgress.completed} of{" "}
+                    {selectedRoadmap.weeks.length} weeks completed
+                  </span>
                   <span>{selectedRoadmap.duration} total</span>
                 </div>
               </div>
 
               <div className="p-6">
-                <div 
+                <div
                   className="space-y-4 scrollbar-thin scrollbar-thumb-gray-600 scrollbar-track-gray-800"
                   style={{ maxHeight: "100%", overflowY: "auto" }}
                 >
                   {selectedRoadmap.weeks.map((week, index) => {
-                    const weekProgress = getWeekProgress(selectedRoadmap.role, index);
+                    const weekProgress = getWeekProgress(
+                      selectedRoadmap.role,
+                      index
+                    );
+                    const isCompleted = (isHydrated && _hasHydrated) ? weekProgress.completed : false;
                     const isExpanded = expandedWeek === index;
-                    
+
                     return (
-                      <div key={index} className="border border-gray-700/50 rounded-lg overflow-hidden bg-gray-700/20 shadow-lg">
+                      <div
+                        key={index}
+                        className="border border-gray-700/50 rounded-lg overflow-hidden bg-gray-700/20 shadow-lg"
+                      >
                         <div className="flex items-center justify-between p-5">
                           <div className="flex items-center space-x-4 flex-1">
                             {/* Completion Checkbox - ONLY triggers API/store update */}
@@ -229,17 +403,24 @@ const CareerRoadmaps = () => {
                                 e.stopPropagation();
                                 handleToggleCompletion(index);
                               }}
+                              disabled={isUpdating}
                               className={`transition-all duration-300 transform hover:scale-110 z-10 relative flex-shrink-0 ${
-                                animatingWeek === index ? 'animate-bounce scale-125' : ''
+                                animatingWeek === index
+                                  ? "animate-bounce scale-125"
+                                  : ""
+                              } ${
+                                isUpdating
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : ""
                               }`}
                             >
-                              {weekProgress.completed ? (
+                              {isCompleted ? (
                                 <CheckCircle className="w-7 h-7 text-green-400 shadow-lg drop-shadow-md" />
                               ) : (
                                 <Circle className="w-7 h-7 text-gray-400 hover:text-blue-400 transition-colors" />
                               )}
                             </button>
-                            
+
                             {/* Accordion Toggle - ONLY expands/collapses */}
                             <div
                               onClick={() => toggleWeekExpansion(index)}
@@ -247,10 +428,16 @@ const CareerRoadmaps = () => {
                             >
                               <div className="flex items-center justify-between">
                                 <div>
-                                  <h3 className="font-semibold text-white text-lg">Week {week.week}: {week.title}</h3>
-                                  <p className="text-sm text-gray-300 mt-1">{week.description}</p>
-                                  {weekProgress.completed && (
-                                    <p className="text-xs text-green-400 mt-1">✓ Completed on {weekProgress.date}</p>
+                                  <h3 className="font-semibold text-white text-lg">
+                                    Week {week.week}: {week.title}
+                                  </h3>
+                                  <p className="text-sm text-gray-300 mt-1">
+                                    {week.description}
+                                  </p>
+                                  {isCompleted && weekProgress.date && (
+                                    <p className="text-xs text-green-400 mt-1">
+                                      ✓ Completed on {weekProgress.date}
+                                    </p>
                                   )}
                                 </div>
                                 <div className="flex items-center space-x-2">
@@ -288,11 +475,20 @@ const CareerRoadmaps = () => {
                                   </h4>
                                   <div className="space-y-2">
                                     {week.skills?.map((skill, skillIndex) => (
-                                      <div key={skillIndex} className="flex items-center space-x-2">
+                                      <div
+                                        key={skillIndex}
+                                        className="flex items-center space-x-2"
+                                      >
                                         <div className="w-2 h-2 bg-blue-400 rounded-full flex-shrink-0" />
-                                        <span className="text-gray-300 text-sm">{skill}</span>
+                                        <span className="text-gray-300 text-sm">
+                                          {skill}
+                                        </span>
                                       </div>
-                                    )) || <p className="text-gray-400 text-sm">No skills listed</p>}
+                                    )) || (
+                                      <p className="text-gray-400 text-sm">
+                                        No skills listed
+                                      </p>
+                                    )}
                                   </div>
                                 </div>
 
@@ -303,14 +499,23 @@ const CareerRoadmaps = () => {
                                     Learning Resources
                                   </h4>
                                   <div className="space-y-2">
-                                    {week.resources?.map((resource, resourceIndex) => (
-                                      <div key={resourceIndex} className="flex items-center space-x-2">
-                                        <div className="w-2 h-2 bg-green-400 rounded-full flex-shrink-0" />
-                                        <span className="text-gray-300 text-sm hover:text-green-400 cursor-pointer transition-colors">
-                                          {resource}
-                                        </span>
-                                      </div>
-                                    )) || <p className="text-gray-400 text-sm">No resources listed</p>}
+                                    {week.resources?.map(
+                                      (resource, resourceIndex) => (
+                                        <div
+                                          key={resourceIndex}
+                                          className="flex items-center space-x-2"
+                                        >
+                                          <div className="w-2 h-2 bg-green-400 rounded-full flex-shrink-0" />
+                                          <span className="text-gray-300 text-sm hover:text-green-400 cursor-pointer transition-colors">
+                                            {resource}
+                                          </span>
+                                        </div>
+                                      )
+                                    ) || (
+                                      <p className="text-gray-400 text-sm">
+                                        No resources listed
+                                      </p>
+                                    )}
                                   </div>
                                 </div>
 
@@ -322,7 +527,9 @@ const CareerRoadmaps = () => {
                                       Week Milestone
                                     </h4>
                                     <div className="bg-gradient-to-r from-yellow-900/20 to-orange-900/20 border border-yellow-500/20 rounded-lg p-4">
-                                      <p className="text-yellow-100 font-medium">{week.milestone}</p>
+                                      <p className="text-yellow-100 font-medium">
+                                        {week.milestone}
+                                      </p>
                                     </div>
                                   </div>
                                 )}
@@ -335,7 +542,7 @@ const CareerRoadmaps = () => {
                                     <Calendar className="w-4 h-4" />
                                     <span>Week {week.week}</span>
                                   </div>
-                                  {weekProgress.completed && (
+                                  {isCompleted && (
                                     <div className="flex items-center space-x-1 text-green-400">
                                       <CheckCircle className="w-4 h-4" />
                                       <span>Completed</span>

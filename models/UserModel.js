@@ -2,6 +2,9 @@ import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
   userId: { type: String, required: true, unique: true }, // Clerk User ID
+  
+  githubUsername: { type: String }, // <-- Add this so we can regenerate summaries later
+  
   summary: { type: Object, default: {} },
   interviewScores: { type: [Number], default: [] },
   
