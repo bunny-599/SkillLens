@@ -9,7 +9,6 @@ import { aiMlMcqs, DataAnaMCQ, mcqsWebdev } from '@/data/mockQuesitons';
 // import { mcqsDevops } from '@/data/mcqsDevops';
 // ... import other roadmap MCQs
 
-// Organize your MCQs by roadmap - add your other datasets here
 
 
 
@@ -19,6 +18,18 @@ const allMCQs = {
   // 'devops': mcqsDevops,
   'datascience': DataAnaMCQ,
   // ... other roadmaps
+};
+
+// Function to convert roadmap display names to MCQ keys
+const getRoadmapKey = (roadmapName) => {
+  const mappings = {
+    'Frontend Developer': 'webdeveloper',
+    'AI/ML Engineer': 'ai/mlengineer',
+    'Data Scientist': 'datascience',
+    'Backend Developer': 'webdeveloper', // assuming same as webdev for now
+    // Add more mappings as needed
+  };
+  return mappings[roadmapName] || roadmapName.toLowerCase().replace(/[^a-z0-9]/g, '');
 };
 
 const QuizPage = () => {
@@ -42,11 +53,16 @@ const QuizPage = () => {
     const loadQuestions = () => {
       setLoading(true);
       
+      // Convert roadmap name to the correct key
+      const roadmapKey = getRoadmapKey(roadmap);
+      console.log(`Converting roadmap "${roadmap}" to key "${roadmapKey}"`);
+      
       // Get the MCQ dataset for the selected roadmap
-      const roadmapMCQs = allMCQs[roadmap];
+      const roadmapMCQs = allMCQs[roadmapKey];
       
       if (!roadmapMCQs) {
-        console.error(`No MCQ data found for roadmap: ${roadmap}`);
+        console.error(`No MCQ data found for roadmap key: ${roadmapKey} (original: ${roadmap})`);
+        console.log('Available roadmap keys:', Object.keys(allMCQs));
         setQuestions([]);
         setLoading(false);
         return;
@@ -103,8 +119,36 @@ const QuizPage = () => {
     }
   };
 
-  const handleSubmitQuiz = () => {
+  const handleSubmitQuiz = async () => {
     setShowResults(true);
+    
+    // Save the mock score to database
+    const percentage = getPercentage();
+    console.log(`Saving mock score: ${percentage}% for roadmap "${roadmap}" week ${weekId}`);
+    
+    try {
+      const response = await fetch('/api/save-mock-score', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          roadmap: roadmap,
+          weekId: weekId,
+          mockScore: percentage
+        })
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('✅ Mock score saved successfully:', result);
+      } else {
+        const errorText = await response.text();
+        console.error('❌ Failed to save mock score:', response.status, errorText);
+      }
+    } catch (error) {
+      console.error('❌ Error saving mock score:', error);
+    }
   };
 
   const calculateScore = () => {

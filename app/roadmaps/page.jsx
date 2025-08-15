@@ -3,12 +3,12 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
+import { toast } from "sonner";
 import {
   CheckCircle,
   Circle,
   Clock,
   BookOpen,
-  Star,
   ArrowRight,
   Target,
   Trophy,
@@ -19,7 +19,7 @@ import {
   Calendar,
 } from "lucide-react";
 import { careerRoadmaps } from "@/data/mockData";
-import useProgressStore from "@/lib/store/progressStore";
+// Removed Zustand store import
 
 const CareerRoadmaps = () => {
   const router = useRouter();
@@ -28,98 +28,57 @@ const CareerRoadmaps = () => {
   const [expandedWeek, setExpandedWeek] = useState(null);
   const [showCompletion, setShowCompletion] = useState(false);
   const [animatingWeek, setAnimatingWeek] = useState(null);
-  const [isHydrated, setIsHydrated] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  useEffect(() => {
-    setIsHydrated(true);
-  }, []);
+  // No need to load progress - we get it directly from mock scores
 
-  // Load progress from database when component mounts
-  useEffect(() => {
-    if (user?.id) {
-      loadUserProgress();
-    }
-  }, [user?.id]);
+  // Removed Zustand hydration logic
 
-  // Add this new useEffect after the existing one
-  useEffect(() => {
-    const unsubscribe = useProgressStore.persist.onFinishHydration(() => {
-      useProgressStore.getState().setHasHydrated(true);
+  // Simple progress tracking without Zustand
+  const [completedWeeks, setCompletedWeeks] = useState(new Set());
+
+  // Simple functions to replace Zustand store
+  const getWeekProgress = (roadmap, weekIndex) => {
+    return { completed: completedWeeks.has(`${roadmap}-${weekIndex}`) };
+  };
+
+  const toggleWeekCompletion = (roadmap, weekIndex) => {
+    const key = `${roadmap}-${weekIndex}`;
+    setCompletedWeeks((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(key)) {
+        newSet.delete(key);
+      } else {
+        newSet.add(key);
+      }
+      return newSet;
     });
-    return unsubscribe;
-  }, []);
+  };
 
-  const {
-    toggleWeekCompletion,
-    getWeekProgress,
-    getRoadmapProgress,
-    _hasHydrated,
-    setRoadmapProgress,
-  } = useProgressStore();
+  const getRoadmapProgress = (roadmap, totalWeeks) => {
+    let completed = 0;
+    for (let i = 0; i < totalWeeks; i++) {
+      if (completedWeeks.has(`${roadmap}-${i}`)) {
+        completed++;
+      }
+    }
+    return {
+      completed,
+      total: totalWeeks,
+      percentage: Math.round((completed / totalWeeks) * 100),
+    };
+  };
 
   // Load user progress from database
-  const loadUserProgress = async () => {
-    try {
-      const response = await fetch("/api/user-progress");
-      if (response.ok) {
-        const data = await response.json();
-        if (data.roadmapProgress) {
-          // Convert the database format to Zustand store format
-          Object.entries(data.roadmapProgress).forEach(
-            ([roadmapKey, progress]) => {
-              setRoadmapProgress(roadmapKey, progress);
-            }
-          );
-        }
-      }
-    } catch (error) {
-      console.error("Error loading user progress:", error);
-    }
-  };
+  // Removed loadUserProgress - no longer needed
 
-  // Save progress to database
-  const saveProgressToDatabase = async (
-    roadmapName,
-    weekIndex,
-    isCompleted
-  ) => {
-    if (!user?.id) return;
-
-    setIsUpdating(true);
-    try {
-      const response = await fetch("/api/user-progress", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          roadmapName,
-          weekIndex,
-          isCompleted,
-          completedAt: isCompleted ? new Date().toISOString() : null,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to save progress");
-      }
-
-      const result = await response.json();
-      console.log("Progress saved:", result);
-    } catch (error) {
-      console.error("Error saving progress:", error);
-      // Optionally show error toast/notification
-    } finally {
-      setIsUpdating(false);
-    }
-  };
+  // Removed saveProgressToDatabase - no longer needed
 
   // Get progress data
-  const roadmapProgress =
-    isHydrated && _hasHydrated
-      ? getRoadmapProgress(selectedRoadmap.role, selectedRoadmap.weeks.length)
-      : { completed: 0, total: selectedRoadmap.weeks.length, percentage: 0 };
+  const roadmapProgress = getRoadmapProgress(
+    selectedRoadmap.role,
+    selectedRoadmap.weeks.length
+  );
   const progressPercentage = roadmapProgress.percentage;
 
   const getDifficultyColor = (difficulty) => {
@@ -141,19 +100,59 @@ const CareerRoadmaps = () => {
 
     console.log("Toggling week completion:", weekIndex + 1);
 
-    // Get current state to determine if we're completing or uncompleting
-    const currentWeekProgress = getWeekProgress(selectedRoadmap.role, weekIndex);
-    const willBeCompleted = !currentWeekProgress.completed;
+    // Check if user is trying to complete (we'll determine from mock score)
+    const willBeCompleted = true; // Always check mock score first
 
-    // Update Zustand store immediately for UI responsiveness
-    toggleWeekCompletion(selectedRoadmap.role, weekIndex);
+    // Always check mock score before allowing completion
+    try {
+      const response = await fetch(
+        `/api/get-mock-score?roadmap=${selectedRoadmap.role}&weekId=${
+          weekIndex + 1
+        }`
+      );
+      console.log(
+        `🔍 Checking mock score for roadmap "${selectedRoadmap.role}" week ${
+          weekIndex + 1
+        }`
+      );
 
-    // Save to database
-    await saveProgressToDatabase(
-      selectedRoadmap.role,
-      weekIndex,
-      willBeCompleted
-    );
+      if (response.ok) {
+        const data = await response.json();
+        console.log(`📊 API Response:`, data);
+        const mockScore = data.mockScore;
+
+        if (!mockScore || mockScore < 90) {
+          toast.error(
+            "You need to score 90% or higher to mark this week as completed!",
+            {
+              description: mockScore
+                ? `Your current score is ${mockScore}%. Take the mock interview again to improve your score.`
+                : "You haven't taken the mock interview yet. Complete it first!",
+              duration: 4000,
+            }
+          );
+          return; // Don't proceed with completion
+        }
+
+        // If we reach here, user has >= 90% score, so mark as complete
+        toggleWeekCompletion(selectedRoadmap.role, weekIndex);
+      } else {
+        toast.error("You need to take the mock interview first!", {
+          description:
+            "Complete the mock interview to get your score before marking as done.",
+          duration: 4000,
+        });
+        return;
+      }
+    } catch (error) {
+      console.error("Error fetching mock score:", error);
+      toast.error("Unable to verify your score. Please try again.", {
+        duration: 4000,
+      });
+      return;
+    }
+
+    // No need to save to database - completion is determined by mock score
 
     // Animation
     setAnimatingWeek(weekIndex);
@@ -266,14 +265,10 @@ const CareerRoadmaps = () => {
                 style={{ maxHeight: "100%", overflowY: "auto" }}
               >
                 {careerRoadmaps.map((roadmap, index) => {
-                  const roadmapProg =
-                    isHydrated && _hasHydrated
-                      ? getRoadmapProgress(roadmap.role, roadmap.weeks.length)
-                      : {
-                          completed: 0,
-                          total: roadmap.weeks.length,
-                          percentage: 0,
-                        };
+                  const roadmapProg = getRoadmapProgress(
+                    roadmap.role,
+                    roadmap.weeks.length
+                  );
                   return (
                     <button
                       key={index}
@@ -386,7 +381,7 @@ const CareerRoadmaps = () => {
                       selectedRoadmap.role,
                       index
                     );
-                    const isCompleted = (isHydrated && _hasHydrated) ? weekProgress.completed : false;
+                    const isCompleted = weekProgress.completed;
                     const isExpanded = expandedWeek === index;
 
                     return (
@@ -434,9 +429,9 @@ const CareerRoadmaps = () => {
                                   <p className="text-sm text-gray-300 mt-1">
                                     {week.description}
                                   </p>
-                                  {isCompleted && weekProgress.date && (
+                                  {isCompleted && (
                                     <p className="text-xs text-green-400 mt-1">
-                                      ✓ Completed on {weekProgress.date}
+                                      ✓ Completed
                                     </p>
                                   )}
                                 </div>
@@ -446,10 +441,10 @@ const CareerRoadmaps = () => {
                                       e.stopPropagation();
                                       handleWeekNavigation(week);
                                     }}
-                                    className="p-2 text-gray-400 hover:text-blue-400 transition-colors rounded-lg hover:bg-gray-600/30"
-                                    title="Take Test"
+                                    className="p-2 text-blue-400 hover:text-blue-300 transition-all duration-200 rounded-lg hover:bg-blue-900/30 border border-blue-500/30 hover:border-blue-400/50 shadow-sm hover:shadow-blue-500/20"
+                                    title="Take Mock Interview"
                                   >
-                                    <ExternalLink className="w-4 h-4" />
+                                    <ExternalLink className="w-5 h-5" />
                                   </button>
                                   {isExpanded ? (
                                     <ChevronUp className="w-5 h-5 text-gray-400" />

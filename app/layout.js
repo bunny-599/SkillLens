@@ -25,6 +25,7 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { Toaster } from '@/components/ui/sonner'
 import LenisProvider from '@/lib/LenisProvider';
 import RouteLoader from '@/components/RouteLoader';
 
@@ -169,6 +170,9 @@ export default function RootLayout({ children }) {
                 <p>Made with 💗 by Teja</p>
               </div>
             </footer>
+            
+            {/* Toast Notifications */}
+            <Toaster />
           </body>
         </html>
       </ClerkProvider>
