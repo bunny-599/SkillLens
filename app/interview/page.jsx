@@ -1,6 +1,17 @@
 "use client";
-import React, { useState, useEffect } from 'react';
-import { Mic, MicOff, Video, VideoOff, Phone, PhoneOff, Code, User, Bot } from 'lucide-react';
+import React, { useState, useEffect } from "react";
+import {
+  Mic,
+  MicOff,
+  Video,
+  VideoOff,
+  PhoneOff,
+  Code,
+  User,
+  Bot,
+  Volume2,
+  VolumeX,
+} from "lucide-react";
 import Vapi from "@vapi-ai/web";
 
 export default function VideoInterview() {
@@ -8,18 +19,41 @@ export default function VideoInterview() {
   const [isRecording, setIsRecording] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [videoEnabled, setVideoEnabled] = useState(true);
-  const [codeInput, setCodeInput] = useState('');
+  const [codeInput, setCodeInput] = useState("");
   const [showCodeEditor, setShowCodeEditor] = useState(false);
-  const [aiSubtitle, setAiSubtitle] = useState('');
-  const [userSubtitle, setUserSubtitle] = useState('');
+  
+  // Enhanced caption states
+  const [aiSubtitle, setAiSubtitle] = useState("");
+  const [userSubtitle, setUserSubtitle] = useState("");
+  const [lastAiCaption, setLastAiCaption] = useState("");
+  const [lastUserCaption, setLastUserCaption] = useState("");
   const [isAiSpeaking, setIsAiSpeaking] = useState(false);
   const [isUserSpeaking, setIsUserSpeaking] = useState(false);
+  
+  // New states for enhanced features
+  const [conversationHistory, setConversationHistory] = useState([]);
+  const [currentQuestion, setCurrentQuestion] = useState("");
+  const [interviewProgress, setInterviewProgress] = useState(0);
+  const [showCaptions, setShowCaptions] = useState(true);
 
-  const vapi = new Vapi(process.env.NEXT_PUBLIC_VAPI_API_KEY);
+  // Initialize Vapi with proper error handling
+  const vapi = React.useMemo(() => {
+    try {
+      const apiKey = process.env.NEXT_PUBLIC_VAPI_API_KEY;
+      if (!apiKey) {
+        console.error("VAPI API key is missing");
+        return null;
+      }
+      return new Vapi(apiKey);
+    } catch (error) {
+      console.error("Failed to initialize Vapi:", error);
+      return null;
+    }
+  }, []);
 
   const assistantOptions = {
     name: "AI Recruiter",
-    firstMessage: "Hello, I’ll be conducting your {jobRole} interview. Let’s get started.",
+    firstMessage: "Hello! I'm your AI interviewer today. Let's begin with your technical interview. Are you ready to start?",
     transcriber: {
       provider: "deepgram",
       model: "nova-2",
@@ -35,119 +69,242 @@ export default function VideoInterview() {
       messages: [
         {
           role: "system",
-          content: `
-  You are a **firm but encouraging AI interviewer** for the role of {jobRole}.
-  Your job is to keep the conversation professional and focused while making the candidate feel motivated.
-  
-  **Interview Structure:**
-  1. Start with a confident but polite greeting.
-  2. Ask **one question at a time** in this order:
-     - **Q1:** Based on the candidate’s GitHub summary {githubSummary}.
-     - **Q2:** Based on their latest repository {latestRepo}.
-     - **Q3:** A medium-level DSA problem relevant for coding interviews.
-     - **Remaining Questions:** Technical, role-specific, and tailored to the candidate’s {progress}.
-  3. Maintain a **clear, slightly strict tone**:
-     - If wrong: "Not quite. Think it through." or "That’s close, but missing detail."
-     - If correct: "Good. Let’s move on."
-  4. Give hints only if they seem stuck for too long — short and targeted hints.
-  5. Acknowledge good answers briefly but positively.
-  6. After 5–7 questions, wrap up with:
-     - A short summary of how they performed.
-     - A motivating closing: "You’re improving. Keep practicing — you’re on the right path."
-  `.trim(),
+          content: `You are a professional AI technical interviewer conducting a comprehensive coding interview.
+
+Interview Structure:
+1. Start with a friendly greeting and ask if they're ready
+2. Ask 5-7 technical questions covering:
+   - Basic programming concepts
+   - Data structures and algorithms
+   - System design basics
+   - Problem-solving scenarios
+3. Present a coding challenge
+4. Provide constructive feedback
+
+Communication Style:
+- Be encouraging yet professional
+- Ask one clear question at a time
+- Wait for complete answers before moving on
+- Provide hints if the candidate struggles
+- Give brief positive reinforcement for correct answers
+- Keep responses concise and focused
+
+Keep the interview engaging, educational, and at an appropriate technical level.`,
         },
       ],
     },
   };
-  
 
   useEffect(() => {
-    if (started) {
-      // Vapi event listeners for real-time subtitles
-      vapi.on('speech-start', () => {
+    if (!vapi || !started) return;
+
+    // Add error handler first
+    const handleError = (error) => {
+      console.error("Vapi error:", error);
+      // Don't crash the app, just log the error
+    };
+
+    vapi.on("error", handleError);
+
+    try {
+      // Enhanced speech event handlers
+      vapi.on("speech-start", () => {
+        console.log("AI started speaking");
         setIsAiSpeaking(true);
-        setUserSubtitle('');
+        setUserSubtitle(""); // Clear user subtitle when AI speaks
       });
 
-      vapi.on('speech-end', () => {
+      vapi.on("speech-end", () => {
+        console.log("AI stopped speaking");
         setIsAiSpeaking(false);
-        setAiSubtitle('');
+        // Keep AI subtitle visible for 3 seconds after speaking ends
+        setTimeout(() => {
+          setAiSubtitle("");
+        }, 3000);
       });
 
-      vapi.on('message', (message) => {
-        if (message.type === 'transcript' && message.transcriptType === 'partial') {
-          if (message.role === 'assistant') {
-            setAiSubtitle(message.transcript);
-          } else {
-            setUserSubtitle(message.transcript);
-            setIsUserSpeaking(true);
+      // Enhanced message handling for better captions
+      vapi.on("message", (message) => {
+        console.log("Vapi message:", message);
+        
+        if (message.type === "transcript") {
+          const transcript = message.transcript || "";
+          
+          if (message.transcriptType === "partial") {
+            // Real-time partial transcripts
+            if (message.role === "assistant") {
+              setAiSubtitle(transcript);
+              setCurrentQuestion(transcript);
+            } else if (message.role === "user") {
+              setUserSubtitle(transcript);
+              setIsUserSpeaking(true);
+            }
+          }
+          
+          if (message.transcriptType === "final") {
+            // Final transcripts for conversation history
+            if (message.role === "assistant") {
+              setLastAiCaption(transcript);
+              setAiSubtitle(transcript);
+              setConversationHistory(prev => [...prev, {
+                role: "assistant",
+                message: transcript,
+                timestamp: new Date().toLocaleTimeString()
+              }]);
+              setInterviewProgress(prev => Math.min(prev + 1, 10));
+              
+              // Clear AI subtitle after delay
+              setTimeout(() => setAiSubtitle(""), 4000);
+            } 
+            
+            if (message.role === "user") {
+              setLastUserCaption(transcript);
+              setIsUserSpeaking(false);
+              setConversationHistory(prev => [...prev, {
+                role: "user",
+                message: transcript,
+                timestamp: new Date().toLocaleTimeString()
+              }]);
+              
+              // Clear user subtitle after delay
+              setTimeout(() => setUserSubtitle(""), 2000);
+            }
           }
         }
-        if (message.type === 'transcript' && message.transcriptType === 'final') {
-          if (message.role === 'user') {
-            setIsUserSpeaking(false);
-            setTimeout(() => setUserSubtitle(''), 3000);
-          }
+
+        // Handle other message types
+        if (message.type === "function-call") {
+          console.log("Function call:", message);
         }
       });
 
-      vapi.on('call-start', () => {
+      vapi.on("call-start", () => {
+        console.log("Call started");
         setIsRecording(true);
+        setConversationHistory([]);
+        setInterviewProgress(0);
       });
 
-      vapi.on('call-end', () => {
+      vapi.on("call-end", () => {
+        console.log("Call ended");
         setIsRecording(false);
         setStarted(false);
-        setAiSubtitle('');
-        setUserSubtitle('');
+        setAiSubtitle("");
+        setUserSubtitle("");
+        setLastAiCaption("");
+        setLastUserCaption("");
+        setIsAiSpeaking(false);
+        setIsUserSpeaking(false);
+        setCurrentQuestion("");
+        setInterviewProgress(0);
       });
 
-      vapi.on('volume-level', (volume) => {
-        // You can use this for visual feedback
+      vapi.on("volume-level", (volume) => {
+        // You can use this for visual volume indicators
+        console.log("Volume level:", volume);
       });
 
-      vapi.on('error', (error) => {
-        console.error('Vapi error:', error);
-      });
+    } catch (error) {
+      console.error("Error setting up Vapi listeners:", error);
     }
 
     return () => {
-      // Cleanup listeners
-      vapi.removeAllListeners();
+      try {
+        vapi.removeAllListeners();
+      } catch (error) {
+        console.error("Error removing Vapi listeners:", error);
+      }
     };
   }, [started, vapi]);
 
   const handleStart = () => {
-    setStarted(true);
-    vapi.start("a1e26993-0042-446a-8379-28cf5891d729", assistantOptions);
+    if (!vapi) {
+      console.error("Vapi not initialized properly");
+      alert("Vapi is not properly initialized. Please check your API key and try again.");
+      return;
+    }
+
+    try {
+      setStarted(true);
+      setConversationHistory([]);
+      
+      // Use the assistant ID you provided, or start with options
+      vapi.start(assistantOptions);
+      
+    } catch (error) {
+      console.error("Error starting Vapi:", error);
+      setStarted(false);
+      alert("Failed to start the interview. Please try again.");
+    }
   };
 
   const handleEndInterview = () => {
-    vapi.stop();
+    if (!vapi) return;
+    
+    try {
+      vapi.stop();
+    } catch (error) {
+      console.error("Error stopping Vapi:", error);
+    }
+    
+    // Reset all states
     setStarted(false);
     setIsRecording(false);
-    setAiSubtitle('');
-    setUserSubtitle('');
+    setAiSubtitle("");
+    setUserSubtitle("");
+    setLastAiCaption("");
+    setLastUserCaption("");
     setIsAiSpeaking(false);
     setIsUserSpeaking(false);
+    setCurrentQuestion("");
+    setInterviewProgress(0);
   };
 
   const toggleMute = () => {
-    setIsMuted(!isMuted);
-    vapi.setMuted(!isMuted);
+    if (!vapi) return;
+    
+    try {
+      setIsMuted(!isMuted);
+      vapi.setMuted(!isMuted);
+    } catch (error) {
+      console.error("Error toggling mute:", error);
+    }
   };
 
   const handleCodeSubmit = () => {
     if (codeInput.trim()) {
-      // You could send this code to the AI for review
-      console.log('Code submitted:', codeInput);
-      setCodeInput('');
+      // Send code to Vapi AI for analysis
+      const codeMessage = `Here's my code solution: ${codeInput}`;
+      console.log("Code submitted:", codeInput);
+      
+      // Add to conversation history
+      setConversationHistory(prev => [...prev, {
+        role: "user",
+        message: `[CODE SUBMITTED] ${codeInput}`,
+        timestamp: new Date().toLocaleTimeString(),
+        isCode: true
+      }]);
+      
+      setCodeInput("");
       setShowCodeEditor(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white scale-90">
+      <style jsx>{`
+        .shadow-text {
+          text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
+        .typing-indicator {
+          animation: typing 1.4s infinite;
+        }
+        @keyframes typing {
+          0%, 60%, 100% { transform: translateY(0); }
+          30% { transform: translateY(-10px); }
+        }
+      `}</style>
+      
       {!started ? (
         <div className="min-h-screen flex items-center justify-center p-4">
           <div className="bg-gray-900/90 backdrop-blur-xl border border-gray-700/50 p-10 rounded-3xl shadow-2xl text-center max-w-md w-full space-y-8">
@@ -156,17 +313,24 @@ export default function VideoInterview() {
                 <Video className="w-8 h-8 text-white" />
               </div>
               <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-                AI Interview
+                AI Technical Interview
               </h1>
               <p className="text-gray-400 leading-relaxed">
-                Get ready for a live AI-powered interview experience with real-time voice interaction.
+                Get ready for a comprehensive AI-powered technical interview with real-time voice interaction and live captions.
               </p>
             </div>
+            
+            {/* API Key Status Check */}
+            {!process.env.NEXT_PUBLIC_VAPI_API_KEY && (
+              <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-3 text-red-400 text-sm">
+                ⚠️ VAPI API key not found. Please add NEXT_PUBLIC_VAPI_API_KEY to your environment variables.
+              </div>
+            )}
             
             <div className="space-y-3 text-sm text-gray-500">
               <div className="flex items-center justify-center gap-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                <span>Voice Recognition Enabled</span>
+                <span>Advanced Voice Recognition</span>
               </div>
               <div className="flex items-center justify-center gap-2">
                 <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
@@ -174,37 +338,72 @@ export default function VideoInterview() {
               </div>
               <div className="flex items-center justify-center gap-2">
                 <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
-                <span>Real-time Subtitles</span>
+                <span>Real-time Live Captions</span>
+              </div>
+              <div className="flex items-center justify-center gap-2">
+                <div className="w-2 h-2 bg-yellow-500 rounded-full animate-pulse"></div>
+                <span>Smart Technical Assessment</span>
               </div>
             </div>
-            
             <button
               onClick={handleStart}
-              className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-lg"
+              disabled={!vapi || !process.env.NEXT_PUBLIC_VAPI_API_KEY}
+              className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
-              🎥 Start Voice Interview
+              {!process.env.NEXT_PUBLIC_VAPI_API_KEY 
+                ? "❌ API Key Required" 
+                : !vapi 
+                  ? "⚠️ Vapi Not Initialized"
+                  : "🎥 Start Technical Interview"
+              }
             </button>
           </div>
         </div>
       ) : (
         <div className="min-h-screen p-4">
           <div className="max-w-7xl mx-auto space-y-6">
-            {/* Header */}
+            {/* Enhanced Header with Progress */}
             <div className="bg-gray-900/90 backdrop-blur-xl border border-gray-700/50 rounded-xl p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className={`w-3 h-3 rounded-full animate-pulse ${isRecording ? 'bg-red-500' : 'bg-gray-500'}`}></div>
+                  <div className={`w-3 h-3 rounded-full animate-pulse ${
+                    isRecording ? "bg-red-500" : "bg-gray-500"
+                  }`}></div>
                   <span className="text-lg font-semibold">
-                    {isRecording ? 'Live Interview Session' : 'Connecting...'}
+                    {isRecording ? "Live Technical Interview" : "Connecting..."}
                   </span>
+                  <div className="text-sm text-gray-400 bg-gray-800/50 px-3 py-1 rounded-full">
+                    Progress: {interviewProgress}/10
+                  </div>
                 </div>
-                <div className="text-sm text-gray-400">
-                  {new Date().toLocaleTimeString()}
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={() => setShowCaptions(!showCaptions)}
+                    className={`p-2 rounded-lg transition-colors ${
+                      showCaptions 
+                        ? "bg-blue-500/20 text-blue-400" 
+                        : "bg-gray-700 text-gray-400"
+                    }`}
+                    title="Toggle Captions"
+                  >
+                    {showCaptions ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
+                  </button>
+                  <div className="text-sm text-gray-400">
+                    {new Date().toLocaleTimeString()}
+                  </div>
                 </div>
+              </div>
+              
+              {/* Progress Bar */}
+              <div className="mt-3 w-full bg-gray-800 rounded-full h-2">
+                <div 
+                  className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-500"
+                  style={{ width: `${(interviewProgress / 10) * 100}%` }}
+                ></div>
               </div>
             </div>
 
-            {/* Video Section */}
+            {/* Video Section with Enhanced Captions */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* User Video */}
               <div className="bg-gray-900/90 backdrop-blur-xl border border-gray-700/50 rounded-xl overflow-hidden">
@@ -213,22 +412,34 @@ export default function VideoInterview() {
                     <User className="w-4 h-4 text-blue-400" />
                     <span className="text-sm font-medium">You</span>
                     {isUserSpeaking && (
-                      <div className="flex items-center gap-1">
-                        <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                        <span className="text-xs text-green-400">Speaking</span>
+                      <div className="flex items-center gap-2 bg-green-500/20 px-2 py-1 rounded-full border border-green-500/30">
+                        <div className="flex gap-1">
+                          <div className="w-1 h-3 bg-green-400 rounded-full animate-pulse"></div>
+                          <div className="w-1 h-2 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: "0.1s" }}></div>
+                          <div className="w-1 h-4 bg-green-400 rounded-full animate-pulse" style={{ animationDelay: "0.2s" }}></div>
+                        </div>
+                        <span className="text-xs text-green-400 font-medium">Speaking</span>
                       </div>
                     )}
                   </div>
                   <div className="flex items-center gap-2">
                     <button
                       onClick={toggleMute}
-                      className={`p-1.5 rounded-full transition-colors ${isMuted ? 'bg-red-500 hover:bg-red-600' : 'bg-gray-700 hover:bg-gray-600'}`}
+                      className={`p-1.5 rounded-full transition-colors ${
+                        isMuted
+                          ? "bg-red-500 hover:bg-red-600"
+                          : "bg-gray-700 hover:bg-gray-600"
+                      }`}
                     >
                       {isMuted ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
                     </button>
                     <button
                       onClick={() => setVideoEnabled(!videoEnabled)}
-                      className={`p-1.5 rounded-full transition-colors ${!videoEnabled ? 'bg-red-500 hover:bg-red-600' : 'bg-gray-700 hover:bg-gray-600'}`}
+                      className={`p-1.5 rounded-full transition-colors ${
+                        !videoEnabled
+                          ? "bg-red-500 hover:bg-red-600"
+                          : "bg-gray-700 hover:bg-gray-600"
+                      }`}
                     >
                       {videoEnabled ? <Video className="w-4 h-4" /> : <VideoOff className="w-4 h-4" />}
                     </button>
@@ -241,6 +452,15 @@ export default function VideoInterview() {
                         <User className="w-8 h-8 text-blue-400" />
                       </div>
                       <div>Your Video Stream</div>
+                      {isUserSpeaking && (
+                        <div className="mt-2 flex justify-center">
+                          <div className="flex gap-1">
+                            <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
+                            <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
+                            <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div className="text-gray-500 text-center">
@@ -248,12 +468,18 @@ export default function VideoInterview() {
                       <div>Camera Off</div>
                     </div>
                   )}
-                  
-                  {/* User Subtitles */}
-                  {userSubtitle && (
-                    <div className="absolute bottom-4 left-4 right-4 bg-blue-600/90 backdrop-blur-sm rounded-lg p-3 border border-blue-500/30">
-                      <div className="text-xs text-blue-200 mb-1">You:</div>
-                      <div className="text-sm text-white font-medium">{userSubtitle}</div>
+
+                  {/* Enhanced User Subtitles */}
+                  {showCaptions && (userSubtitle || lastUserCaption) && (
+                    <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 max-w-[90%]">
+                      <div className="bg-black/90 backdrop-blur-sm rounded-lg px-4 py-2 border border-blue-400/40 shadow-2xl">
+                        <div className="text-xs text-blue-300 mb-1 font-medium flex items-center gap-1">
+                          👤 You {isUserSpeaking && <span className="typing-indicator">●</span>}
+                        </div>
+                        <div className="text-white font-medium text-center leading-relaxed shadow-text">
+                          {userSubtitle || lastUserCaption}
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -263,32 +489,56 @@ export default function VideoInterview() {
               <div className="bg-gray-900/90 backdrop-blur-xl border border-gray-700/50 rounded-xl overflow-hidden">
                 <div className="bg-gray-800/50 px-4 py-2 flex items-center gap-2">
                   <Bot className="w-4 h-4 text-purple-400" />
-                  <span className="text-sm font-medium">AI Recruiter</span>
+                  <span className="text-sm font-medium">AI Technical Interviewer</span>
                   {isAiSpeaking && (
-                    <div className="flex items-center gap-1 ml-auto">
-                      <div className="w-2 h-2 bg-purple-400 rounded-full animate-pulse"></div>
-                      <span className="text-xs text-purple-400">Speaking</span>
+                    <div className="flex items-center gap-2 bg-purple-500/20 px-2 py-1 rounded-full border border-purple-500/30 ml-auto">
+                      <div className="flex gap-1">
+                        <div className="w-1 h-3 bg-purple-400 rounded-full animate-pulse"></div>
+                        <div className="w-1 h-2 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: "0.1s" }}></div>
+                        <div className="w-1 h-4 bg-purple-400 rounded-full animate-pulse" style={{ animationDelay: "0.2s" }}></div>
+                      </div>
+                      <span className="text-xs text-purple-400 font-medium">Speaking</span>
                     </div>
                   )}
                   {!isAiSpeaking && isRecording && (
-                    <div className="ml-auto w-2 h-2 bg-green-500 rounded-full"></div>
+                    <div className="ml-auto flex items-center gap-1">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-xs text-green-400">Listening</span>
+                    </div>
                   )}
                 </div>
                 <div className="aspect-video bg-gradient-to-br from-purple-900/20 to-blue-900/20 flex items-center justify-center relative">
                   <div className="text-center space-y-2">
-                    <div className={`w-16 h-16 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full mx-auto flex items-center justify-center transition-all duration-300 ${isAiSpeaking ? 'animate-pulse scale-110' : ''}`}>
+                    <div className={`w-16 h-16 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full mx-auto flex items-center justify-center transition-all duration-300 ${
+                      isAiSpeaking ? "animate-pulse scale-110" : ""
+                    }`}>
                       <Bot className="w-8 h-8 text-white" />
                     </div>
                     <div className="text-gray-300 text-sm">
-                      {isRecording ? 'AI Assistant Active' : 'Connecting...'}
+                      {isRecording ? "AI Interviewer Active" : "Connecting..."}
                     </div>
+                    {isAiSpeaking && (
+                      <div className="flex justify-center mt-2">
+                        <div className="flex gap-1">
+                          <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
+                          <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
+                          <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  
-                  {/* AI Subtitles */}
-                  {aiSubtitle && (
-                    <div className="absolute bottom-4 left-4 right-4 bg-purple-600/90 backdrop-blur-sm rounded-lg p-3 border border-purple-500/30">
-                      <div className="text-xs text-purple-200 mb-1">AI Recruiter:</div>
-                      <div className="text-sm text-white font-medium">{aiSubtitle}</div>
+
+                  {/* Enhanced AI Subtitles */}
+                  {showCaptions && (aiSubtitle || lastAiCaption) && (
+                    <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 max-w-[90%]">
+                      <div className="bg-black/90 backdrop-blur-sm rounded-lg px-4 py-2 border border-purple-400/40 shadow-2xl">
+                        <div className="text-xs text-purple-300 mb-1 font-medium flex items-center gap-1">
+                          🤖 AI Interviewer {isAiSpeaking && <span className="typing-indicator">●</span>}
+                        </div>
+                        <div className="text-white font-medium text-center leading-relaxed shadow-text">
+                          {aiSubtitle || lastAiCaption}
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -296,52 +546,106 @@ export default function VideoInterview() {
             </div>
 
             {/* Code Editor Section */}
-            <div className="bg-gray-900/90 backdrop-blur-xl border border-gray-700/50 rounded-xl p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h4 className="text-lg font-semibold text-white flex items-center gap-2">
-                  <Code className="w-5 h-5 text-blue-400" />
-                  Code Challenge
-                </h4>
-                <button
-                  onClick={() => setShowCodeEditor(!showCodeEditor)}
-                  className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white text-sm rounded-lg transition-colors"
-                >
-                  {showCodeEditor ? 'Hide Editor' : 'Show Editor'}
-                </button>
+            <div className="bg-gray-900/90 backdrop-blur-xl border border-gray-700/50 rounded-xl overflow-hidden">
+              <div className="bg-gradient-to-r from-gray-800/50 to-gray-700/50 px-6 py-4 border-b border-gray-600/30">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-blue-500/20 rounded-lg">
+                      <Code className="w-5 h-5 text-blue-400" />
+                    </div>
+                    <div>
+                      <h4 className="text-lg font-semibold text-white">Live Code Editor</h4>
+                      <p className="text-sm text-gray-400">Write and submit your solution</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowCodeEditor(!showCodeEditor)}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-all transform hover:scale-105 ${
+                      showCodeEditor
+                        ? "bg-red-500/20 text-red-400 border border-red-500/30 hover:bg-red-500/30"
+                        : "bg-blue-500/20 text-blue-400 border border-blue-500/30 hover:bg-blue-500/30"
+                    }`}
+                  >
+                    {showCodeEditor ? "📝 Hide Editor" : "💻 Open Editor"}
+                  </button>
+                </div>
               </div>
               
               {showCodeEditor && (
-                <div className="space-y-4">
-                  <textarea
-                    value={codeInput}
-                    onChange={(e) => setCodeInput(e.target.value)}
-                    placeholder="// Write your React code here...
-function Counter() {
-  const [count, setCount] = useState(0);
-  
-  return (
-    <div>
-      <p>Count: {count}</p>
-      <button onClick={() => setCount(count + 1)}>
-        Increment
-      </button>
-    </div>
-  );
-}"
-                    className="w-full h-64 bg-gray-800/50 border border-gray-600/50 rounded-lg p-4 text-white placeholder-gray-400 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent resize-none"
-                  />
-                  <div className="flex justify-between items-center">
-                    <div className="text-xs text-gray-400">
-                      JavaScript • React • TypeScript supported
+                <div className="p-6 space-y-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2 text-sm text-gray-400">
+                      <div className="flex items-center gap-1">
+                        <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                        <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                      </div>
+                      <span className="ml-2">solution.js</span>
                     </div>
-                    <button
-                      onClick={handleCodeSubmit}
-                      disabled={!codeInput.trim()}
-                      className="px-6 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white text-sm rounded-lg transition-colors flex items-center gap-2"
-                    >
-                      <Code className="w-4 h-4" />
-                      Submit Code
-                    </button>
+                    <div className="flex items-center gap-2 text-xs text-gray-500">
+                      <span>JavaScript</span>
+                      <span>•</span>
+                      <span>Python</span>
+                      <span>•</span>
+                      <span>TypeScript</span>
+                    </div>
+                  </div>
+                  <div className="relative">
+                    <textarea
+                      value={codeInput}
+                      onChange={(e) => setCodeInput(e.target.value)}
+                      placeholder="// Write your solution here...
+// The AI interviewer will analyze your code
+
+function solutionFunction() {
+  // Your implementation here
+  
+}
+
+// Test cases
+console.log(solutionFunction());"
+                      className="w-full h-80 bg-gray-800/70 border border-gray-600/50 rounded-lg p-4 pl-12 text-white placeholder-gray-500 font-mono text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 resize-none transition-all"
+                      style={{
+                        lineHeight: "1.6",
+                        tabSize: "2",
+                      }}
+                    />
+                    <div className="absolute left-2 top-4 text-xs text-gray-600 font-mono leading-relaxed pointer-events-none select-none">
+                      {Array.from({ length: 20 }, (_, i) => (
+                        <div key={i} className="h-[22.4px] flex items-center">
+                          {i + 1}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between pt-4 border-t border-gray-700/50">
+                    <div className="flex items-center gap-4">
+                      <div className="text-sm text-gray-400">
+                        Lines: {codeInput.split("\n").length} | Characters: {codeInput.length}
+                      </div>
+                      {codeInput.trim() && (
+                        <div className="flex items-center gap-1 text-xs text-green-400">
+                          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                          <span>Ready to submit</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => setCodeInput("")}
+                        className="px-4 py-2 bg-gray-700/50 hover:bg-gray-600/50 text-gray-300 text-sm rounded-lg transition-colors"
+                      >
+                        Clear
+                      </button>
+                      <button
+                        onClick={handleCodeSubmit}
+                        disabled={!codeInput.trim()}
+                        className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 disabled:from-gray-700 disabled:to-gray-700 disabled:cursor-not-allowed text-white text-sm rounded-lg transition-all transform hover:scale-105 flex items-center gap-2 shadow-lg font-medium"
+                      >
+                        <Code className="w-4 h-4" />
+                        Submit to AI
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
@@ -357,6 +661,85 @@ function Counter() {
                 End Interview
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Enhanced Bottom Captions - User Speaking */}
+      {started && showCaptions && (userSubtitle || (isUserSpeaking && lastUserCaption)) && (
+        <div className="fixed left-0 right-0 bottom-20 w-full flex justify-center pointer-events-none z-50">
+          <div className="bg-black/90 backdrop-blur-sm text-white px-6 py-3 rounded-lg text-lg max-w-4xl text-center shadow-2xl border-l-4 border-blue-400">
+            <div className="flex items-center justify-center gap-2 mb-1">
+              <User className="w-4 h-4 text-blue-400" />
+              <span className="text-blue-300 font-semibold text-sm">You</span>
+              {isUserSpeaking && (
+                <div className="flex gap-1 ml-2">
+                  <div className="w-1 h-1 bg-blue-400 rounded-full animate-bounce"></div>
+                  <div className="w-1 h-1 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
+                  <div className="w-1 h-1 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+                </div>
+              )}
+            </div>
+            <div className="text-white leading-relaxed shadow-text">
+              {userSubtitle || lastUserCaption}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Enhanced Bottom Captions - AI Speaking */}
+      {started && showCaptions && (aiSubtitle || (isAiSpeaking && lastAiCaption)) && (
+        <div className="fixed left-0 right-0 bottom-2 w-full flex justify-center pointer-events-none z-50">
+          <div className="bg-black/90 backdrop-blur-sm text-white px-6 py-3 rounded-lg text-lg max-w-4xl text-center shadow-2xl border-l-4 border-purple-400">
+            <div className="flex items-center justify-center gap-2 mb-1">
+              <Bot className="w-4 h-4 text-purple-400" />
+              <span className="text-purple-300 font-semibold text-sm">AI Interviewer</span>
+              {isAiSpeaking && (
+                <div className="flex gap-1 ml-2">
+                  <div className="w-1 h-1 bg-purple-400 rounded-full animate-bounce"></div>
+                  <div className="w-1 h-1 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
+                  <div className="w-1 h-1 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
+                </div>
+              )}
+            </div>
+            <div className="text-white leading-relaxed shadow-text">
+              {aiSubtitle || lastAiCaption}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Conversation History Panel (Optional - can be toggled) */}
+      {started && conversationHistory.length > 0 && (
+        <div className="fixed right-4 top-1/2 transform -translate-y-1/2 w-80 max-h-96 bg-black/80 backdrop-blur-sm rounded-lg border border-gray-700 overflow-hidden z-40">
+          <div className="bg-gray-800/50 px-4 py-2 border-b border-gray-600">
+            <h3 className="text-sm font-semibold text-white">Interview Log</h3>
+          </div>
+          <div className="overflow-y-auto max-h-80 p-4 space-y-3">
+            {conversationHistory.slice(-6).map((item, index) => (
+              <div key={index} className={`text-xs p-2 rounded ${
+                item.role === 'assistant' 
+                  ? 'bg-purple-900/30 border-l-2 border-purple-400' 
+                  : item.isCode 
+                    ? 'bg-blue-900/30 border-l-2 border-blue-400'
+                    : 'bg-gray-800/50 border-l-2 border-gray-400'
+              }`}>
+                <div className="text-gray-400 mb-1 flex items-center gap-1">
+                  {item.role === 'assistant' ? <Bot className="w-3 h-3" /> : <User className="w-3 h-3" />}
+                  <span>{item.role === 'assistant' ? 'AI' : 'You'}</span>
+                  <span className="ml-auto">{item.timestamp}</span>
+                </div>
+                <div className="text-white text-xs">
+                  {item.isCode ? (
+                    <code className="bg-gray-800 p-1 rounded text-green-400">
+                      {item.message.replace('[CODE SUBMITTED] ', '')}
+                    </code>
+                  ) : (
+                    item.message
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}

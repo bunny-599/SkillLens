@@ -37,6 +37,26 @@ const CareerRoadmaps = () => {
   // Simple progress tracking without Zustand
   const [completedWeeks, setCompletedWeeks] = useState(new Set());
 
+  // Load completed weeks from database - FAST single API call
+  useEffect(() => {
+    const loadCompletedWeeks = async () => {
+      if (!user?.id) return;
+      
+      try {
+        const response = await fetch('/api/get-all-progress');
+        if (response.ok) {
+          const data = await response.json();
+          const completedSet = new Set(Object.keys(data.completedWeeks));
+          setCompletedWeeks(completedSet);
+        }
+      } catch (error) {
+        console.error('Error loading completed weeks:', error);
+      }
+    };
+
+    loadCompletedWeeks();
+  }, [user?.id]);
+
   // Simple functions to replace Zustand store
   const getWeekProgress = (roadmap, weekIndex) => {
     return { completed: completedWeeks.has(`${roadmap}-${weekIndex}`) };
@@ -106,7 +126,7 @@ const CareerRoadmaps = () => {
     // Always check mock score before allowing completion
     try {
       const response = await fetch(
-        `/api/get-mock-score?roadmap=${selectedRoadmap.role}&weekId=${
+        `/api/get-all-progress?roadmap=${selectedRoadmap.role}&weekId=${
           weekIndex + 1
         }`
       );
@@ -501,9 +521,20 @@ const CareerRoadmaps = () => {
                                           className="flex items-center space-x-2"
                                         >
                                           <div className="w-2 h-2 bg-green-400 rounded-full flex-shrink-0" />
-                                          <span className="text-gray-300 text-sm hover:text-green-400 cursor-pointer transition-colors">
-                                            {resource}
-                                          </span>
+                                          {typeof resource === 'object' && resource.url ? (
+                                            <a
+                                              href={resource.url}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="text-gray-300 text-sm hover:text-green-400 cursor-pointer transition-colors hover:underline"
+                                            >
+                                              {resource.name}
+                                            </a>
+                                          ) : (
+                                            <span className="text-gray-300 text-sm">
+                                              {typeof resource === 'string' ? resource : resource.name}
+                                            </span>
+                                          )}
                                         </div>
                                       )
                                     ) || (

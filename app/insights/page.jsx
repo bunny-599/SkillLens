@@ -9,7 +9,7 @@ import {
   BarChart3,
   Globe,
 } from "lucide-react";
-import { industryInsights } from "@/data/mockData";
+import { industryInsights } from "@/data/industries";
 
 const IndustryInsights = () => {
   const [selectedRole, setSelectedRole] = useState("Web Developer");
@@ -36,6 +36,8 @@ const IndustryInsights = () => {
         return "text-green-300 bg-green-800";
       case "Medium":
         return "text-yellow-300 bg-yellow-800";
+        case "Very High":
+        return "text-green-300 bg-green-800";
       case "Low":
         return "text-red-300 bg-red-800";
       default:
