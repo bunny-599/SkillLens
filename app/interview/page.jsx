@@ -13,28 +13,28 @@ import {
   VolumeX,
 } from "lucide-react";
 import Vapi from "@vapi-ai/web";
+import { useUser } from "@clerk/nextjs";
 
 export default function VideoInterview() {
+  const { user } = useUser(); // Get user from Clerk
   const [started, setStarted] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [videoEnabled, setVideoEnabled] = useState(true);
   const [codeInput, setCodeInput] = useState("");
   const [showCodeEditor, setShowCodeEditor] = useState(false);
-  
-  // Enhanced caption states
   const [aiSubtitle, setAiSubtitle] = useState("");
   const [userSubtitle, setUserSubtitle] = useState("");
   const [lastAiCaption, setLastAiCaption] = useState("");
   const [lastUserCaption, setLastUserCaption] = useState("");
   const [isAiSpeaking, setIsAiSpeaking] = useState(false);
   const [isUserSpeaking, setIsUserSpeaking] = useState(false);
-  
-  // New states for enhanced features
   const [conversationHistory, setConversationHistory] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState("");
   const [interviewProgress, setInterviewProgress] = useState(0);
   const [showCaptions, setShowCaptions] = useState(true);
+  const [userInterviewData, setUserInterviewData] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   // Initialize Vapi with proper error handling
   const vapi = React.useMemo(() => {
@@ -51,48 +51,169 @@ export default function VideoInterview() {
     }
   }, []);
 
-  const assistantOptions = {
-    name: "AI Recruiter",
-    firstMessage: "Hello! I'm your AI interviewer today. Let's begin with your technical interview. Are you ready to start?",
-    transcriber: {
-      provider: "deepgram",
-      model: "nova-2",
-      language: "en-US",
-    },
-    voice: {
-      provider: "playht",
-      voiceId: "jennifer",
-    },
-    model: {
-      provider: "openai",
-      model: "gpt-4",
-      messages: [
-        {
-          role: "system",
-          content: `You are a professional AI technical interviewer conducting a comprehensive coding interview.
+  // Fetch user interview data
+  const fetchUserData = async () => {
+    try {
+      setLoading(true);
+      
+      // Get target role from localStorage
+      const targetRole = localStorage.getItem('targetRole') || 'developer';
+      
+      // Get userId from Clerk
+      const userId = user?.id;
+      
+      if (!userId) {
+        console.error('User not authenticated with Clerk');
+        return {
+          githubUsername: user?.username || 'developer',
+          targetRole,
+          totalWeeksCompleted: 0,
+          summary: {
+            s: { langs: ['JavaScript'], lvl: 'Beginner' },
+            r: []
+          }
+        };
+      }
 
-Interview Structure:
-1. Start with a friendly greeting and ask if they're ready
-2. Ask 5-7 technical questions covering:
-   - Basic programming concepts
-   - Data structures and algorithms
-   - System design basics
-   - Problem-solving scenarios
-3. Present a coding challenge
-4. Provide constructive feedback
+      const response = await fetch(`/api/interview-data?userId=${userId}`);
+      
+      if (!response.ok) {
+        console.log('Failed to fetch user data from API, using fallback');
+        return {
+          githubUsername: user?.username || 'developer',
+          targetRole,
+          totalWeeksCompleted: 0,
+          summary: {
+            s: { langs: ['JavaScript'], lvl: 'Beginner' },
+            r: []
+          }
+        };
+      }
+      
+      const userData = await response.json();
+      
+      // Calculate total weeks completed - only count completed weeks
+      let totalWeeks = 0;
+      if (userData.roadmapProgress) {
+        Object.keys(userData.roadmapProgress).forEach(role => {
+          if (userData.roadmapProgress[role].weeks) {
+            const weeks = Object.keys(userData.roadmapProgress[role].weeks);
+            // Only count completed weeks
+            weeks.forEach(weekNum => {
+              const week = userData.roadmapProgress[role].weeks[weekNum];
+              if (week && week.completed) {
+                totalWeeks += 1;
+              }
+            });
+          }
+        });
+      }
 
-Communication Style:
-- Be encouraging yet professional
-- Ask one clear question at a time
-- Wait for complete answers before moving on
-- Provide hints if the candidate struggles
-- Give brief positive reinforcement for correct answers
-- Keep responses concise and focused
+      return {
+        ...userData,
+        targetRole,
+        totalWeeksCompleted: totalWeeks
+      };
 
-Keep the interview engaging, educational, and at an appropriate technical level.`,
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      // Return fallback data so interview can still work
+      return {
+        githubUsername: user?.username || 'developer',
+        targetRole: localStorage.getItem('targetRole') || 'developer',
+        totalWeeksCompleted: 0,
+        summary: {
+          s: { langs: ['JavaScript'], lvl: 'Beginner' },
+          r: []
+        }
+      };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Generate dynamic assistant options based on user data
+  const getAssistantOptions = (userData) => {
+    if (!userData) {
+      // Fallback to default options
+      return {
+        name: "AI Recruiter",
+        firstMessage: "Hello! I'm your AI interviewer today. Let's begin with your technical interview. Are you ready to start?",
+        transcriber: {
+          provider: "deepgram",
+          model: "nova-2",
+          language: "en-US",
         },
-      ],
-    },
+        voice: {
+          provider: "playht",
+          voiceId: "jennifer",
+        },
+        model: {
+          provider: "openai",
+          model: "gpt-4",
+          messages: [
+            {
+              role: "system",
+              content: `You are a professional AI technical interviewer conducting a comprehensive coding interview. Keep responses concise and focused.`,
+            },
+          ],
+        },
+      };
+    }
+
+    const { githubUsername, summary, targetRole, totalWeeksCompleted } = userData;
+    const recentRepos = summary?.r?.slice(0, 3) || [];
+    const languages = summary?.s?.langs || ['JavaScript'];
+    const level = summary?.s?.lvl || 'Beginner';
+
+    const systemPrompt = `You are a professional AI technical interviewer for a ${targetRole} position.
+
+CANDIDATE PROFILE:
+- GitHub: ${githubUsername}
+- Experience Level: ${level}
+- Languages: ${languages.join(', ')}
+- Learning Progress: ${totalWeeksCompleted} weeks completed in roadmap
+- Recent Projects: ${recentRepos.map(r => r.n).join(', ')}
+
+INTERVIEW FOCUS:
+1. Ask about their recent projects${recentRepos.length > 0 ? ` (${recentRepos.map(r => r.n).slice(0, 2).join(', ')})` : ''}
+2. Discuss challenges faced in latest repository and how they solved them
+3. Test knowledge in their main languages: ${languages.slice(0, 2).join(', ')}
+4. Ask ${targetRole}-specific technical questions based on their ${totalWeeksCompleted} weeks of progress
+5. Present a coding challenge relevant to ${targetRole}
+
+STYLE:
+- Keep questions concise and targeted
+- Reference their GitHub projects specifically when available
+- Ask follow-up questions about problem-solving approaches
+- Be encouraging but thorough
+- One question at a time, wait for complete answers
+
+Start by asking about their coding journey and recent work.`;
+
+    return {
+      name: "AI Recruiter",
+      firstMessage: `Hello ${githubUsername}! I've reviewed your profile and see you're targeting a ${targetRole} role. Ready to discuss your coding journey?`,
+      transcriber: {
+        provider: "deepgram",
+        model: "nova-2",
+        language: "en-US",
+      },
+      voice: {
+        provider: "playht",
+        voiceId: "jennifer",
+      },
+      model: {
+        provider: "openai",
+        model: "gpt-4",
+        messages: [
+          {
+            role: "system",
+            content: systemPrompt,
+          },
+        ],
+      },
+    };
   };
 
   useEffect(() => {
@@ -101,7 +222,6 @@ Keep the interview engaging, educational, and at an appropriate technical level.
     // Add error handler first
     const handleError = (error) => {
       console.error("Vapi error:", error);
-      // Don't crash the app, just log the error
     };
 
     vapi.on("error", handleError);
@@ -111,13 +231,12 @@ Keep the interview engaging, educational, and at an appropriate technical level.
       vapi.on("speech-start", () => {
         console.log("AI started speaking");
         setIsAiSpeaking(true);
-        setUserSubtitle(""); // Clear user subtitle when AI speaks
+        setUserSubtitle("");
       });
 
       vapi.on("speech-end", () => {
         console.log("AI stopped speaking");
         setIsAiSpeaking(false);
-        // Keep AI subtitle visible for 3 seconds after speaking ends
         setTimeout(() => {
           setAiSubtitle("");
         }, 3000);
@@ -131,7 +250,6 @@ Keep the interview engaging, educational, and at an appropriate technical level.
           const transcript = message.transcript || "";
           
           if (message.transcriptType === "partial") {
-            // Real-time partial transcripts
             if (message.role === "assistant") {
               setAiSubtitle(transcript);
               setCurrentQuestion(transcript);
@@ -142,7 +260,6 @@ Keep the interview engaging, educational, and at an appropriate technical level.
           }
           
           if (message.transcriptType === "final") {
-            // Final transcripts for conversation history
             if (message.role === "assistant") {
               setLastAiCaption(transcript);
               setAiSubtitle(transcript);
@@ -152,8 +269,6 @@ Keep the interview engaging, educational, and at an appropriate technical level.
                 timestamp: new Date().toLocaleTimeString()
               }]);
               setInterviewProgress(prev => Math.min(prev + 1, 10));
-              
-              // Clear AI subtitle after delay
               setTimeout(() => setAiSubtitle(""), 4000);
             } 
             
@@ -165,14 +280,11 @@ Keep the interview engaging, educational, and at an appropriate technical level.
                 message: transcript,
                 timestamp: new Date().toLocaleTimeString()
               }]);
-              
-              // Clear user subtitle after delay
               setTimeout(() => setUserSubtitle(""), 2000);
             }
           }
         }
 
-        // Handle other message types
         if (message.type === "function-call") {
           console.log("Function call:", message);
         }
@@ -200,7 +312,6 @@ Keep the interview engaging, educational, and at an appropriate technical level.
       });
 
       vapi.on("volume-level", (volume) => {
-        // You can use this for visual volume indicators
         console.log("Volume level:", volume);
       });
 
@@ -217,10 +328,15 @@ Keep the interview engaging, educational, and at an appropriate technical level.
     };
   }, [started, vapi]);
 
-  const handleStart = () => {
+  const handleStart = async () => {
     if (!vapi) {
       console.error("Vapi not initialized properly");
       alert("Vapi is not properly initialized. Please check your API key and try again.");
+      return;
+    }
+
+    if (!user) {
+      alert("Please sign in to start the interview.");
       return;
     }
 
@@ -228,7 +344,13 @@ Keep the interview engaging, educational, and at an appropriate technical level.
       setStarted(true);
       setConversationHistory([]);
       
-      // Use the assistant ID you provided, or start with options
+      // Fetch user data and create dynamic assistant options
+      const userData = await fetchUserData();
+      setUserInterviewData(userData);
+      
+      const assistantOptions = getAssistantOptions(userData);
+      
+      // Start Vapi with dynamic options
       vapi.start(assistantOptions);
       
     } catch (error) {
@@ -258,6 +380,7 @@ Keep the interview engaging, educational, and at an appropriate technical level.
     setIsUserSpeaking(false);
     setCurrentQuestion("");
     setInterviewProgress(0);
+    setUserInterviewData(null);
   };
 
   const toggleMute = () => {
@@ -273,11 +396,8 @@ Keep the interview engaging, educational, and at an appropriate technical level.
 
   const handleCodeSubmit = () => {
     if (codeInput.trim()) {
-      // Send code to Vapi AI for analysis
-      const codeMessage = `Here's my code solution: ${codeInput}`;
       console.log("Code submitted:", codeInput);
       
-      // Add to conversation history
       setConversationHistory(prev => [...prev, {
         role: "user",
         message: `[CODE SUBMITTED] ${codeInput}`,
@@ -289,6 +409,19 @@ Keep the interview engaging, educational, and at an appropriate technical level.
       setShowCodeEditor(false);
     }
   };
+
+  // Show loading or sign in prompt if user is not authenticated
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white flex items-center justify-center">
+        <div className="text-center p-8">
+          <Bot className="w-16 h-16 mx-auto mb-4 text-purple-400" />
+          <h2 className="text-2xl font-bold mb-4">Please Sign In</h2>
+          <p className="text-gray-400">You need to be signed in to start the technical interview.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white scale-90">
@@ -318,6 +451,13 @@ Keep the interview engaging, educational, and at an appropriate technical level.
               <p className="text-gray-400 leading-relaxed">
                 Get ready for a comprehensive AI-powered technical interview with real-time voice interaction and live captions.
               </p>
+              {userInterviewData && (
+                <div className="text-slate-300 text-sm bg-gray-800/50 rounded-lg p-3">
+                  <p>Welcome, @{userInterviewData.githubUsername || user.username}</p>
+                  <p>Target: {userInterviewData.targetRole}</p>
+                  <p>Progress: {userInterviewData.totalWeeksCompleted} weeks completed</p>
+                </div>
+              )}
             </div>
             
             {/* API Key Status Check */}
@@ -347,14 +487,16 @@ Keep the interview engaging, educational, and at an appropriate technical level.
             </div>
             <button
               onClick={handleStart}
-              disabled={!vapi || !process.env.NEXT_PUBLIC_VAPI_API_KEY}
+              disabled={!vapi || !process.env.NEXT_PUBLIC_VAPI_API_KEY || loading}
               className="w-full py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
             >
-              {!process.env.NEXT_PUBLIC_VAPI_API_KEY 
-                ? "❌ API Key Required" 
-                : !vapi 
-                  ? "⚠️ Vapi Not Initialized"
-                  : "🎥 Start Technical Interview"
+              {loading 
+                ? "🔄 Loading Profile..." 
+                : !process.env.NEXT_PUBLIC_VAPI_API_KEY 
+                  ? "❌ API Key Required" 
+                  : !vapi 
+                    ? "⚠️ Vapi Not Initialized"
+                    : "🎥 Start Technical Interview"
               }
             </button>
           </div>
@@ -410,7 +552,7 @@ Keep the interview engaging, educational, and at an appropriate technical level.
                 <div className="bg-gray-800/50 px-4 py-2 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <User className="w-4 h-4 text-blue-400" />
-                    <span className="text-sm font-medium">You</span>
+                    <span className="text-sm font-medium">{user.username || 'You'}</span>
                     {isUserSpeaking && (
                       <div className="flex items-center gap-2 bg-green-500/20 px-2 py-1 rounded-full border border-green-500/30">
                         <div className="flex gap-1">
@@ -671,7 +813,7 @@ console.log(solutionFunction());"
           <div className="bg-black/90 backdrop-blur-sm text-white px-6 py-3 rounded-lg text-lg max-w-4xl text-center shadow-2xl border-l-4 border-blue-400">
             <div className="flex items-center justify-center gap-2 mb-1">
               <User className="w-4 h-4 text-blue-400" />
-              <span className="text-blue-300 font-semibold text-sm">You</span>
+              <span className="text-blue-300 font-semibold text-sm">{user.username || 'You'}</span>
               {isUserSpeaking && (
                 <div className="flex gap-1 ml-2">
                   <div className="w-1 h-1 bg-blue-400 rounded-full animate-bounce"></div>
@@ -726,7 +868,7 @@ console.log(solutionFunction());"
               }`}>
                 <div className="text-gray-400 mb-1 flex items-center gap-1">
                   {item.role === 'assistant' ? <Bot className="w-3 h-3" /> : <User className="w-3 h-3" />}
-                  <span>{item.role === 'assistant' ? 'AI' : 'You'}</span>
+                  <span>{item.role === 'assistant' ? 'AI' : user.username || 'You'}</span>
                   <span className="ml-auto">{item.timestamp}</span>
                 </div>
                 <div className="text-white text-xs">

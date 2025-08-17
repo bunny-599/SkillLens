@@ -61,6 +61,67 @@ const fetchRepoLanguages = async (owner, repo) => {
   }
 };
 
+// ------------------- Gemini Analysis -------------------
+const analyzeWithGemini = async (githubSummary, targetRole) => {
+  const prompt = `Analyze this GitHub profile for a ${targetRole} role:
+
+Username: ${githubSummary.u}
+Repos: ${githubSummary.s.pr} | Followers: ${githubSummary.s.f} | Stars: ${githubSummary.s.stars}
+Languages: ${githubSummary.s.langs.join(', ')}
+Recent projects: ${githubSummary.s.recent.join(', ')}
+
+Give me ONLY:
+1. 3 main issues/pain points in their profile
+2. 5 improvement tips
+
+Format as JSON:
+{
+  "issues": ["issue 1", "issue 2", "issue 3"],
+  "tips": ["tip 1", "tip 2", "tip 3", "tip 4", "tip 5"]
+}
+
+Be direct and honest. Keep it short.`;
+
+  try {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{
+            text: prompt
+          }]
+        }],
+        generationConfig: {
+          temperature: 0.7,
+          maxOutputTokens: 500,
+        }
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Gemini API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const analysisText = data.candidates[0].content.parts[0].text;
+    
+    // Extract JSON from the response
+    const jsonMatch = analysisText.match(/\{[\s\S]*\}/);
+    if (jsonMatch) {
+      return JSON.parse(jsonMatch[0]);
+    } else {
+      throw new Error("Invalid response from Gemini");
+    }
+    
+  } catch (error) {
+    console.error("Error calling Gemini API:", error);
+    throw new Error("Failed to analyze profile");
+  }
+};
+
 // ------------------- Summary Builder -------------------
 const buildCompactProfileSummary = async (username) => {
   const profile = await fetchGitHubProfile(username);
@@ -171,12 +232,15 @@ export async function GET(req) {
     const { searchParams } = new URL(req.url);
     const githubUsername = searchParams.get("username");
     const saveToDb = searchParams.get("save") === "true";
+    const targetRole = searchParams.get("role");
+    const analyze = searchParams.get("analyze") === "true";
 
     if (!githubUsername) {
       return NextResponse.json({ error: "GitHub username is required" }, { status: 400 });
     }
 
     let result;
+    let analysis = null;
     
     if (saveToDb) {
       // Save to user's profile in DB
@@ -187,9 +251,15 @@ export async function GET(req) {
       result = await buildCompactProfileSummary(githubUsername);
     }
 
+    // If analysis is requested and target role is provided
+    if (analyze && targetRole && result) {
+      analysis = await analyzeWithGemini(result, targetRole);
+    }
+
     return NextResponse.json({ 
       success: true,
       result,
+      analysis,
       message: saveToDb ? "Summary saved to your profile" : "Summary generated"
     }, { status: 200 });
 
@@ -229,6 +299,9 @@ export async function POST(req) {
       return NextResponse.json({ error: "Unauthorized. Please log in." }, { status: 401 });
     }
 
+    const body = await req.json();
+    const { targetRole, analyze } = body;
+
     await connectDB();
 
     // Find user and regenerate summary using stored GitHub username
@@ -242,9 +315,15 @@ export async function POST(req) {
     // Regenerate summary
     const updatedUser = await updateUserGitHubSummary(userId, user.githubUsername);
     
+    let analysis = null;
+    if (analyze && targetRole) {
+      analysis = await analyzeWithGemini(updatedUser.summary, targetRole);
+    }
+    
     return NextResponse.json({ 
       success: true,
       result: updatedUser.summary,
+      analysis,
       message: "GitHub summary regenerated successfully"
     }, { status: 200 });
 

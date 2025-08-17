@@ -752,7 +752,7 @@ export const careerRoadmaps = [
     ],
   },
   {
-    role: "Cybersecurity Analyst",
+    role: "CybersecurityAnalyst",
     description:
       "Protect systems and data from cyber threats and vulnerabilities",
     duration: "20 weeks",
@@ -918,7 +918,7 @@ export const careerRoadmaps = [
     ],
   },
   {
-    role: "Mobile App Developer",
+    role: "MobileAppDeveloper",
     description:
       "Design and build high-performance mobile applications for Android and iOS",
     duration: "20 weeks",
@@ -1091,7 +1091,7 @@ export const careerRoadmaps = [
   },
 
   {
-    role: "Cloud & DevOps Engineer",
+    role: "CloudDevOpsEngineer",
     description:
       "Design, deploy, and manage cloud infrastructure and automate deployments",
     duration: "20 weeks",
@@ -1243,7 +1243,7 @@ export const careerRoadmaps = [
     ],
   },
   {
-    role: "Game Developer",
+    role: "GameDeveloper",
     description:
       "Design and build interactive games using game engines and programming logic",
     duration: "20 weeks",
@@ -1405,7 +1405,7 @@ export const careerRoadmaps = [
     ],
   },
   {
-    role: "Blockchain Developer",
+    role: "BlockchainDeveloper",
     description:
       "Build decentralized applications and smart contracts using blockchain technology",
     duration: "20 weeks",
@@ -1547,7 +1547,7 @@ export const careerRoadmaps = [
     ],
   },
   {
-    role: "UI/UX Designer",
+    role: "UI/UXDesigner",
     description:
       "Design intuitive and visually appealing user experiences for web and mobile apps",
     duration: "20 weeks",
@@ -1695,69 +1695,5 @@ export const careerRoadmaps = [
         completed: false,
       },
     ],
-  },
-];
-
-export const mockGitHubAnalysis = {
-  username: "john-doe",
-  totalRepos: 24,
-  overallAlignment: 0.75,
-  topLanguages: ["JavaScript", "Python", "TypeScript", "CSS"],
-  repositories: [
-    {
-      name: "react-todo-app",
-      description: "A modern todo application built with React and TypeScript",
-      languages: ["JavaScript", "TypeScript", "CSS"],
-      stars: 45,
-      forks: 12,
-      lastUpdated: "2024-01-15",
-      readmeContent: "Modern todo app with React hooks and TypeScript",
-      relevanceScore: 0.95,
-    },
-    {
-      name: "python-data-analysis",
-      description: "Data analysis project using pandas and matplotlib",
-      languages: ["Python", "Jupyter Notebook"],
-      stars: 23,
-      forks: 8,
-      lastUpdated: "2024-01-10",
-      readmeContent: "Comprehensive data analysis of sales data",
-      relevanceScore: 0.65,
-    },
-  ],
-  recommendations: [
-    "Focus more on backend technologies like Node.js or Django",
-    "Add more complex projects showcasing full-stack development",
-    "Include testing frameworks in your projects",
-    "Document your projects better with detailed README files",
-  ],
-};
-
-export const mockQuestions = [
-  {
-    id: "1",
-    question:
-      "Which of the following is the correct way to declare a React functional component?",
-    options: [
-      "function Component() { return <div>Hello</div>; }",
-      "const Component = () => { return <div>Hello</div>; }",
-      "class Component extends React.Component { render() { return <div>Hello</div>; } }",
-      "Both A and B",
-    ],
-    correctAnswer: 3,
-    explanation:
-      "Both function declarations and arrow functions are valid ways to create functional components in React.",
-    difficulty: "Easy",
-    topic: "React Basics",
-  },
-  {
-    id: "2",
-    question: "What is the time complexity of binary search?",
-    options: ["O(n)", "O(log n)", "O(n log n)", "O(1)"],
-    correctAnswer: 1,
-    explanation:
-      "Binary search divides the search space in half with each comparison, resulting in O(log n) time complexity.",
-    difficulty: "Medium",
-    topic: "Algorithms",
   },
 ];

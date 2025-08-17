@@ -1,77 +1,77 @@
 export const mcqsWebdev = [
   // ---------- WEEK 1: HTML & CSS Fundamentals ----------
-  // {
-  //   week: 1,
-  //   topic: "HTML",
-  //   question: "Which tag defines the main content of an HTML document?",
-  //   options: ["<body>", "<main>", "<div>", "<section>"],
-  //   answer: "<main>",
-  //   explanation: "<main> is a semantic HTML5 tag used to wrap the main content. Source: MDN Web Docs."
-  // },
-  // {
-  //   week: 1,
-  //   topic: "HTML",
-  //   question: "Which attribute is used to provide alternative text for images?",
-  //   options: ["alt", "src", "title", "desc"],
-  //   answer: "alt",
-  //   explanation: "The 'alt' attribute provides alternative text for accessibility. Source: MDN."
-  // },
-  // {
-  //   week: 1,
-  //   topic: "HTML",
-  //   question: "Which tag is used to create a hyperlink?",
-  //   options: ["<link>", "<href>", "<a>", "<nav>"],
-  //   answer: "<a>",
-  //   explanation: "<a> tag with 'href' is used to define hyperlinks. Source: freeCodeCamp."
-  // },
-  // {
-  //   week: 1,
-  //   topic: "CSS",
-  //   question: "Which CSS property sets the background color of an element?",
-  //   options: ["color", "bgcolor", "background-color", "background"],
-  //   answer: "background-color",
-  //   explanation: "'background-color' sets the background color. Source: MDN CSS Reference."
-  // },
-  // {
-  //   week: 1,
-  //   topic: "CSS",
-  //   question: "Which unit is relative to the font size of the element?",
-  //   options: ["px", "em", "%", "vh"],
-  //   answer: "em",
-  //   explanation: "'em' is relative to the element’s font-size. Source: CSS Tricks."
-  // },
-  // {
-  //   week: 1,
-  //   topic: "Flexbox",
-  //   question: "Which property defines how items are spaced along the main axis in Flexbox?",
-  //   options: ["align-items", "justify-content", "flex-direction", "align-content"],
-  //   answer: "justify-content",
-  //   explanation: "'justify-content' controls main axis spacing. Source: MDN Flexbox Guide."
-  // },
-  // {
-  //   week: 1,
-  //   topic: "Flexbox",
-  //   question: "What does 'flex-direction: row-reverse;' do?",
-  //   options: ["Reverses item order horizontally", "Aligns items to bottom", "Stacks items vertically", "Removes flexbox"],
-  //   answer: "Reverses item order horizontally",
-  //   explanation: "'row-reverse' lays out items right-to-left. Source: CSS Tricks Flexbox Cheatsheet."
-  // },
-  // {
-  //   week: 1,
-  //   topic: "Grid",
-  //   question: "Which CSS property starts a Grid layout?",
-  //   options: ["display: grid", "grid-template", "grid-start", "layout: grid"],
-  //   answer: "display: grid",
-  //   explanation: "'display: grid' initiates CSS Grid layout. Source: MDN Grid Layout Docs."
-  // },
-  // {
-  //   week: 1,
-  //   topic: "Grid",
-  //   question: "What does 'repeat(3, 1fr)' mean in CSS Grid?",
-  //   options: ["3 rows of equal height", "3 columns of equal width", "1 column repeated 3 times", "Grid lines repeated 3 times"],
-  //   answer: "3 columns of equal width",
-  //   explanation: "'repeat(3, 1fr)' defines 3 equal fractional columns. Source: CSS Grid Guide."
-  // },
+  {
+    week: 1,
+    topic: "HTML",
+    question: "Which tag defines the main content of an HTML document?",
+    options: ["<body>", "<main>", "<div>", "<section>"],
+    answer: "<main>",
+    explanation: "<main> is a semantic HTML5 tag used to wrap the main content. Source: MDN Web Docs."
+  },
+  {
+    week: 1,
+    topic: "HTML",
+    question: "Which attribute is used to provide alternative text for images?",
+    options: ["alt", "src", "title", "desc"],
+    answer: "alt",
+    explanation: "The 'alt' attribute provides alternative text for accessibility. Source: MDN."
+  },
+  {
+    week: 1,
+    topic: "HTML",
+    question: "Which tag is used to create a hyperlink?",
+    options: ["<link>", "<href>", "<a>", "<nav>"],
+    answer: "<a>",
+    explanation: "<a> tag with 'href' is used to define hyperlinks. Source: freeCodeCamp."
+  },
+  {
+    week: 1,
+    topic: "CSS",
+    question: "Which CSS property sets the background color of an element?",
+    options: ["color", "bgcolor", "background-color", "background"],
+    answer: "background-color",
+    explanation: "'background-color' sets the background color. Source: MDN CSS Reference."
+  },
+  {
+    week: 1,
+    topic: "CSS",
+    question: "Which unit is relative to the font size of the element?",
+    options: ["px", "em", "%", "vh"],
+    answer: "em",
+    explanation: "'em' is relative to the element’s font-size. Source: CSS Tricks."
+  },
+  {
+    week: 1,
+    topic: "Flexbox",
+    question: "Which property defines how items are spaced along the main axis in Flexbox?",
+    options: ["align-items", "justify-content", "flex-direction", "align-content"],
+    answer: "justify-content",
+    explanation: "'justify-content' controls main axis spacing. Source: MDN Flexbox Guide."
+  },
+  {
+    week: 1,
+    topic: "Flexbox",
+    question: "What does 'flex-direction: row-reverse;' do?",
+    options: ["Reverses item order horizontally", "Aligns items to bottom", "Stacks items vertically", "Removes flexbox"],
+    answer: "Reverses item order horizontally",
+    explanation: "'row-reverse' lays out items right-to-left. Source: CSS Tricks Flexbox Cheatsheet."
+  },
+  {
+    week: 1,
+    topic: "Grid",
+    question: "Which CSS property starts a Grid layout?",
+    options: ["display: grid", "grid-template", "grid-start", "layout: grid"],
+    answer: "display: grid",
+    explanation: "'display: grid' initiates CSS Grid layout. Source: MDN Grid Layout Docs."
+  },
+  {
+    week: 1,
+    topic: "Grid",
+    question: "What does 'repeat(3, 1fr)' mean in CSS Grid?",
+    options: ["3 rows of equal height", "3 columns of equal width", "1 column repeated 3 times", "Grid lines repeated 3 times"],
+    answer: "3 columns of equal width",
+    explanation: "'repeat(3, 1fr)' defines 3 equal fractional columns. Source: CSS Grid Guide."
+  },
   {
     week: 1,
     topic: "HTML",
@@ -3429,4 +3429,1318 @@ export const DataAnaMCQ = [
     explanation:
       "A strong capstone project combines technical proficiency with practical problem-solving and clear communication of results. [Project Portfolio](https://towardsdatascience.com/how-to-build-a-data-science-portfolio-5f566517c79c)",
   },
+];
+
+export const cyberMCQ = [
+  // Week 1: Introduction to Cybersecurity (10 questions)
+  {
+    week: 1,
+    topic: "CIA Triad",
+    question: "Which component of the CIA triad ensures that information is only accessible to authorized individuals?",
+    options: [
+      "Confidentiality",
+      "Integrity",
+      "Availability",
+      "Authentication"
+    ],
+    answer: "Confidentiality",
+    explanation: "Confidentiality ensures that sensitive information is only accessible to those who are authorized to view it. [CIA Triad](https://www.csoonline.com/article/3519908/the-cia-triad-definition-components-and-examples.html)"
+  },
+  {
+    week: 1,
+    topic: "Threat Modeling",
+    question: "What is the primary purpose of creating a threat model?",
+    options: [
+      "To identify potential security threats and vulnerabilities",
+      "To create complex passwords",
+      "To monitor network traffic",
+      "To install security patches"
+    ],
+    answer: "To identify potential security threats and vulnerabilities",
+    explanation: "Threat modeling helps in understanding potential security threats and vulnerabilities in a system before they can be exploited. [Threat Modeling](https://owasp.org/www-community/Threat_Modeling_Process)"
+  },
+  {
+    week: 1,
+    topic: "Security Terminology",
+    question: "What is the difference between a threat and a vulnerability?",
+    options: [
+      "A threat is a weakness, a vulnerability is an exploit",
+      "A threat is a potential danger, a vulnerability is a weakness",
+      "They mean the same thing",
+      "A threat is always external, a vulnerability is always internal"
+    ],
+    answer: "A threat is a potential danger, a vulnerability is a weakness",
+    explanation: "A threat is any circumstance or event with the potential to cause harm, while a vulnerability is a weakness that could be exploited. [Security Terms](https://www.csoonline.com/article/2120384/security-terms-glossary.html)"
+  },
+  {
+    week: 1,
+    topic: "Types of Attacks",
+    question: "What is a DDoS attack?",
+    options: [
+      "A type of phishing attack",
+      "Distributed Denial of Service attack",
+      "A method of encrypting data",
+      "A type of malware"
+    ],
+    answer: "Distributed Denial of Service attack",
+    explanation: "A DDoS attack floods a target with traffic from multiple sources to make it unavailable to users. [DDoS Attack](https://www.cloudflare.com/learning/ddos/what-is-a-ddos-attack/)"
+  },
+  {
+    week: 1,
+    topic: "Security Frameworks",
+    question: "What is the purpose of the NIST Cybersecurity Framework?",
+    options: [
+      "To provide guidelines for secure coding",
+      "To offer a set of industry standards for managing cybersecurity risk",
+      "To create encryption algorithms",
+      "To develop antivirus software"
+    ],
+    answer: "To offer a set of industry standards for managing cybersecurity risk",
+    explanation: "The NIST CSF provides a policy framework of computer security guidance for how organizations can assess and improve their ability to prevent, detect, and respond to cyber attacks. [NIST CSF](https://www.nist.gov/cyberframework)"
+  },
+  {
+    week: 1,
+    topic: "Risk Management",
+    question: "What is the formula for calculating risk?",
+    options: [
+      "Risk = Threat × Vulnerability",
+      "Risk = Impact × Probability",
+      "Risk = Asset Value × Threat",
+      "Risk = Vulnerability × Control"
+    ],
+    answer: "Risk = Threat × Vulnerability",
+    explanation: "Risk is typically calculated as the product of threat and vulnerability. [Risk Management](https://www.techtarget.com/searchsecurity/definition/risk-management)"
+  },
+  {
+    week: 1,
+    topic: "Security Controls",
+    question: "Which of the following is an example of a technical control?",
+    options: [
+      "Security awareness training",
+      "Firewall",
+      "Security policy",
+      "Background checks"
+    ],
+    answer: "Firewall",
+    explanation: "Technical controls are implemented through technology, such as firewalls, encryption, and antivirus software. [Security Controls](https://www.techtarget.com/searchsecurity/definition/security-controls)"
+  },
+  {
+    week: 1,
+    topic: "Authentication",
+    question: "What is multi-factor authentication (MFA)?",
+    options: [
+      "Using multiple passwords",
+      "A method that requires two or more verification factors",
+      "A type of encryption",
+      "A network security protocol"
+    ],
+    answer: "A method that requires two or more verification factors",
+    explanation: "MFA requires users to provide two or more verification factors to gain access to a resource. [MFA](https://www.csoonline.com/article/3239148/what-is-mfa-how-it-works-and-how-it-can-help-prevent-cyberattacks.html)"
+  },
+  {
+    week: 1,
+    topic: "Security Policies",
+    question: "What is the purpose of an Acceptable Use Policy (AUP)?",
+    options: [
+      "To define how software should be used",
+      "To specify security requirements for hardware",
+      "To outline rules for network usage",
+      "To document incident response procedures"
+    ],
+    answer: "To outline rules for network usage",
+    explanation: "An AUP defines what users are allowed to do with the organization's IT resources and network. [AUP](https://www.techtarget.com/searchsecurity/definition/acceptable-use-policy-AUP)"
+  },
+  {
+    week: 1,
+    topic: "Incident Response",
+    question: "What is the first step in the incident response process?",
+    options: [
+      "Containment",
+      "Preparation",
+      "Eradication",
+      "Recovery"
+    ],
+    answer: "Preparation",
+    explanation: "Preparation is the first and most important phase of incident response, involving planning and establishing procedures. [Incident Response](https://www.csoonline.com/article/2120377/incident-response/incident-response-planning-an-introduction.html)"
+  },
+
+  // Week 2: Networking Fundamentals (10 questions)
+  {
+    week: 2,
+    topic: "OSI Model",
+    question: "Which OSI layer is responsible for error detection and correction?",
+    options: [
+      "Physical",
+      "Data Link",
+      "Network",
+      "Transport"
+    ],
+    answer: "Data Link",
+    explanation: "The Data Link layer (Layer 2) handles error detection and correction between directly connected nodes. [OSI Model](https://www.cloudflare.com/learning/ddos/glossary/open-systems-interconnection-model-osi/)"
+  },
+  {
+    week: 2,
+    topic: "TCP/IP",
+    question: "What is the purpose of the TCP three-way handshake?",
+    options: [
+      "To encrypt data",
+      "To establish a connection",
+      "To compress data",
+      "To authenticate users"
+    ],
+    answer: "To establish a connection",
+    explanation: "The three-way handshake (SYN, SYN-ACK, ACK) establishes a reliable connection between devices. [TCP Handshake](https://www.cloudflare.com/learning/ddos/glossary/tcp-ip/)"
+  },
+  {
+    week: 2,
+    topic: "IP Addressing",
+    question: "What is the difference between IPv4 and IPv6?",
+    options: [
+      "IPv4 is newer than IPv6",
+      "IPv6 has a larger address space than IPv4",
+      "IPv4 is more secure than IPv6",
+      "IPv6 doesn't support routing"
+    ],
+    answer: "IPv6 has a larger address space than IPv4",
+    explanation: "IPv6 uses 128-bit addresses compared to IPv4's 32-bit addresses, providing a vastly larger address space. [IPv6](https://www.cloudflare.com/learning/ipv6/what-is-ipv6/)"
+  },
+  {
+    week: 2,
+    topic: "Ports & Protocols",
+    question: "Which port does HTTPS typically use?",
+    options: ["80", "443", "22", "21"],
+    answer: "443",
+    explanation: "HTTPS (HTTP Secure) typically uses port 443 for secure web communications. [HTTPS](https://www.cloudflare.com/learning/ssl/what-is-https/)"
+  },
+  {
+    week: 2,
+    topic: "Network Topologies",
+    question: "Which network topology provides the highest level of redundancy?",
+    options: [
+      "Bus",
+      "Star",
+      "Ring",
+      "Mesh"
+    ],
+    answer: "Mesh",
+    explanation: "A mesh topology provides multiple paths between nodes, offering the highest level of redundancy. [Network Topologies](https://www.computerhope.com/jargon/n/network-topologies.htm)"
+  },
+  {
+    week: 2,
+    topic: "Subnetting",
+    question: "What is the purpose of a subnet mask?",
+    options: [
+      "To hide the network from external threats",
+      "To divide a network into smaller, more manageable sub-networks",
+      "To encrypt network traffic",
+      "To connect different network types"
+    ],
+    answer: "To divide a network into smaller, more manageable sub-networks",
+    explanation: "A subnet mask is used to divide an IP network into smaller, more manageable sub-networks. [Subnetting](https://www.cloudflare.com/learning/network-layer/what-is-a-subnet/)"
+  },
+  {
+    week: 2,
+    topic: "Network Devices",
+    question: "What is the primary function of a router?",
+    options: [
+      "To connect devices within the same network",
+      "To forward data between different networks",
+      "To amplify network signals",
+      "To filter network traffic"
+    ],
+    answer: "To forward data between different networks",
+    explanation: "Routers forward data packets between different computer networks. [Routers](https://www.cisco.com/c/en/us/solutions/small-business/resource-center/networking/how-does-a-router-work.html)"
+  },
+  {
+    week: 2,
+    topic: "Wireless Security",
+    question: "Which wireless security protocol is considered the most secure?",
+    options: [
+      "WEP",
+      "WPA",
+      "WPA2",
+      "WPA3"
+    ],
+    answer: "WPA3",
+    explanation: "WPA3 is the most secure wireless security protocol, offering stronger encryption and security features than its predecessors. [WPA3](https://www.wi-fi.org/discover-wi-fi/security)"
+  },
+  {
+    week: 2,
+    topic: "Network Address Translation (NAT)",
+    question: "What is the primary purpose of NAT?",
+    options: [
+      "To encrypt network traffic",
+      "To map private IP addresses to a public IP address",
+      "To prevent DDoS attacks",
+      "To increase network speed"
+    ],
+    answer: "To map private IP addresses to a public IP address",
+    explanation: "NAT allows multiple devices on a local network to be mapped to a single public IP address. [NAT](https://www.cisco.com/c/en/us/support/docs/ip/network-address-translation-nat/26704-nat-faq-00.html)"
+  },
+  {
+    week: 2,
+    topic: "DNS",
+    question: "What is the purpose of the Domain Name System (DNS)?",
+    options: [
+      "To encrypt web traffic",
+      "To translate domain names to IP addresses",
+      "To filter malicious websites",
+      "To create virtual private networks"
+    ],
+    answer: "To translate domain names to IP addresses",
+    explanation: "DNS translates human-readable domain names into machine-readable IP addresses. [DNS](https://www.cloudflare.com/learning/dns/what-is-dns/)"
+  },
+    // Week 3: Operating Systems Security (10 questions)
+    {
+      week: 3,
+      topic: "Linux Permissions",
+      question: "What does the command 'chmod 750 file.txt' do?",
+      options: [
+        "Gives read/write/execute to owner, read/execute to group, none to others",
+        "Gives all permissions to everyone",
+        "Deletes the file after execution",
+        "Changes the file ownership to user 750"
+      ],
+      answer: "Gives read/write/execute to owner, read/execute to group, none to others",
+      explanation: "chmod 750 means: Owner (7=rwx), Group (5=r-x), Others (0=---). [Linux Permissions](https://www.guru99.com/file-permissions.html)"
+    },
+    {
+      week: 3,
+      topic: "Windows Security",
+      question: "What is the purpose of User Account Control (UAC) in Windows?",
+      options: [
+        "To create user accounts automatically",
+        "To prevent unauthorized system changes",
+        "To schedule system updates",
+        "To encrypt files and folders"
+      ],
+      answer: "To prevent unauthorized system changes",
+      explanation: "UAC helps prevent unauthorized changes to the operating system by requiring administrator approval for certain actions. [Windows UAC](https://docs.microsoft.com/en-us/windows/security/identity-protection/user-account-control/how-user-account-control-works)"
+    },
+    {
+      week: 3,
+      topic: "File Systems",
+      question: "Which file system is recommended for Windows 10/11 for better security?",
+      options: [
+        "FAT32",
+        "exFAT",
+        "NTFS",
+        "HFS+"
+      ],
+      answer: "NTFS",
+      explanation: "NTFS (New Technology File System) provides better security features like file permissions and encryption compared to FAT32 or exFAT. [NTFS Security](https://www.ntfs.com/ntfs_basics.htm)"
+    },
+    {
+      week: 3,
+      topic: "User Roles",
+      question: "What is the principle of least privilege (PoLP)?",
+      options: [
+        "Giving users only the permissions they need",
+        "All users have admin rights",
+        "No user has any permissions by default",
+        "Permissions are granted based on seniority"
+      ],
+      answer: "Giving users only the permissions they need",
+      explanation: "PoLP means users should have the minimum levels of access necessary to complete their work. [Principle of Least Privilege](https://www.beyondtrust.com/resources/glossary/principle-least-privilege-polp)"
+    },
+    {
+      week: 3,
+      topic: "Windows Firewall",
+      question: "What is the purpose of Windows Defender Firewall?",
+      options: [
+        "To scan for viruses",
+        "To block unauthorized network traffic",
+        "To encrypt files",
+        "To manage user accounts"
+      ],
+      answer: "To block unauthorized network traffic",
+      explanation: "Windows Defender Firewall monitors and controls incoming and outgoing network traffic based on security rules. [Windows Firewall](https://support.microsoft.com/en-us/windows/microsoft-defender-firewall-5037f53c-e8e2-466c-8674-ae696b0fc8cd)"
+    },
+    {
+      week: 3,
+      topic: "Linux Security",
+      question: "What is the purpose of the 'sudo' command?",
+      options: [
+        "To switch to root user",
+        "To execute a command with superuser privileges",
+        "To shut down the system",
+        "To list directory contents"
+      ],
+      answer: "To execute a command with superuser privileges",
+      explanation: "sudo allows a permitted user to execute a command as the superuser or another user. [Linux sudo](https://www.sudo.ws/)"
+    },
+    {
+      week: 3,
+      topic: "Windows Updates",
+      question: "Why is it important to keep operating systems updated?",
+      options: [
+        "To get new features only",
+        "To fix security vulnerabilities and bugs",
+        "To increase computer speed",
+        "To change the user interface"
+      ],
+      answer: "To fix security vulnerabilities and bugs",
+      explanation: "Regular updates patch security vulnerabilities and fix bugs that could be exploited by attackers. [Windows Updates](https://support.microsoft.com/en-us/windows/windows-update-faq-8a903416-6f45-0718-f5c7-375e92dddeb2)"
+    },
+    {
+      week: 3,
+      topic: "Linux Security",
+      question: "What is the purpose of the 'passwd' command in Linux?",
+      options: [
+        "To change file permissions",
+        "To change user password",
+        "To create a new user",
+        "To display system information"
+      ],
+      answer: "To change user password",
+      explanation: "The passwd command is used to change the password of a user account in Linux. [Linux passwd](https://www.cyberciti.biz/faq/linux-set-change-password-how-to/)"
+    },
+    {
+      week: 3,
+      topic: "Windows Security",
+      question: "What is Windows Defender?",
+      options: [
+        "A firewall only",
+        "An antivirus and antimalware solution",
+        "A password manager",
+        "A backup tool"
+      ],
+      answer: "An antivirus and antimalware solution",
+      explanation: "Windows Defender provides real-time protection against viruses, malware, and other threats. [Windows Defender](https://www.microsoft.com/en-us/windows/comprehensive-security)"
+    },
+    {
+      week: 3,
+      topic: "Linux Security",
+      question: "What is the purpose of the 'chroot' command?",
+      options: [
+        "To change the root password",
+        "To create a restricted environment for running programs",
+        "To check disk usage",
+        "To change file ownership"
+      ],
+      answer: "To create a restricted environment for running programs",
+      explanation: "chroot runs a command with a special root directory, often used for system recovery or testing. [Linux chroot](https://www.tecmint.com/chroot-advanced-usage-examples/)"
+    },
+  
+    // Week 4: Cryptography Basics (10 questions)
+    {
+      week: 4,
+      topic: "Encryption",
+      question: "What is the main difference between symmetric and asymmetric encryption?",
+      options: [
+        "Symmetric is faster but requires secure key exchange",
+        "Asymmetric is faster but less secure",
+        "Symmetric uses one key, asymmetric uses two",
+        "Asymmetric is only used for hashing"
+      ],
+      answer: "Symmetric uses one key, asymmetric uses two",
+      explanation: "Symmetric encryption uses a single key for both encryption and decryption, while asymmetric uses a public/private key pair. [Encryption Types](https://www.cloudflare.com/learning/ssl/what-is-encryption/)"
+    },
+    {
+      week: 4,
+      topic: "Hashing",
+      question: "Which of these is a characteristic of cryptographic hash functions?",
+      options: [
+        "Reversible",
+        "Fixed-length output",
+        "Predictable output",
+        "Fast to compute in both directions"
+      ],
+      answer: "Fixed-length output",
+      explanation: "Hash functions always produce a fixed-length output regardless of input size, and are designed to be one-way functions. [Hashing](https://www.cloudflare.com/learning/security/threats/sql-injection/)"
+    },
+    {
+      week: 4,
+      topic: "SSL/TLS",
+      question: "What is the purpose of SSL/TLS certificates?",
+      options: [
+        "To store passwords securely",
+        "To authenticate websites and encrypt data in transit",
+        "To prevent DDoS attacks",
+        "To create secure backups"
+      ],
+      answer: "To authenticate websites and encrypt data in transit",
+      explanation: "SSL/TLS certificates verify website identity and enable encrypted connections. [SSL/TLS](https://www.cloudflare.com/learning/ssl/what-is-ssl/)"
+    },
+    {
+      week: 4,
+      topic: "Digital Signatures",
+      question: "What is the purpose of a digital signature?",
+      options: [
+        "To encrypt files",
+        "To verify the authenticity and integrity of a message",
+        "To compress data",
+        "To create secure passwords"
+      ],
+      answer: "To verify the authenticity and integrity of a message",
+      explanation: "Digital signatures provide proof of origin and ensure the message hasn't been altered. [Digital Signatures](https://www.digicert.com/what-is-a-digital-signature)"
+    },
+    {
+      week: 4,
+      topic: "Encryption Algorithms",
+      question: "Which of these is an asymmetric encryption algorithm?",
+      options: [
+        "AES",
+        "3DES",
+        "RSA",
+        "Blowfish"
+      ],
+      answer: "RSA",
+      explanation: "RSA is an asymmetric encryption algorithm, while the others are symmetric. [RSA Encryption](https://www.comparitech.com/blog/information-security/rsa-encryption/)"
+    },
+    {
+      week: 4,
+      topic: "Hashing",
+      question: "Which of these is a secure hashing algorithm?",
+      options: [
+        "MD5",
+        "SHA-1",
+        "SHA-256",
+        "All of the above"
+      ],
+      answer: "SHA-256",
+      explanation: "SHA-256 is currently considered secure, while MD5 and SHA-1 have known vulnerabilities. [Hashing Algorithms](https://www.ssl.com/faqs/what-is-a-hash-function/)"
+    },
+    {
+      week: 4,
+      topic: "PKI",
+      question: "What is Public Key Infrastructure (PKI) used for?",
+      options: [
+        "Managing encryption keys and digital certificates",
+        "Creating strong passwords",
+        "Preventing phishing attacks",
+        "Monitoring network traffic"
+      ],
+      answer: "Managing encryption keys and digital certificates",
+      explanation: "PKI manages the creation, distribution, and revocation of digital certificates. [PKI](https://www.keyfactor.com/resources/what-is-pki/)"
+    },
+    {
+      week: 4,
+      topic: "Key Exchange",
+      question: "What is the purpose of the Diffie-Hellman key exchange?",
+      options: [
+        "To create digital signatures",
+        "To securely exchange cryptographic keys over a public channel",
+        "To encrypt files",
+        "To hash passwords"
+      ],
+      answer: "To securely exchange cryptographic keys over a public channel",
+      explanation: "Diffie-Hellman enables two parties to establish a shared secret over an insecure channel. [Diffie-Hellman](https://www.cloudflare.com/learning/ssl/what-is-the-diffie-hellman-key-exchange/)"
+    },
+    {
+      week: 4,
+      topic: "SSL/TLS",
+      question: "What does HTTPS stand for?",
+      options: [
+        "HyperText Transfer Protocol Secure",
+        "HyperText Transfer Protocol Standard",
+        "HyperText Transfer Protected Service",
+        "HyperText Transfer Protocol Socket"
+      ],
+      answer: "HyperText Transfer Protocol Secure",
+      explanation: "HTTPS is the secure version of HTTP, using SSL/TLS for encryption. [HTTPS](https://www.cloudflare.com/learning/ssl/what-is-https/)"
+    },
+    {
+      week: 4,
+      topic: "Cryptography",
+      question: "What is the purpose of a salt in password hashing?",
+      options: [
+        "To make the password longer",
+        "To prevent rainbow table attacks",
+        "To encrypt the password",
+        "To store the password securely"
+      ],
+      answer: "To prevent rainbow table attacks",
+      explanation: "A salt is random data added to passwords before hashing to prevent precomputed attacks. [Password Salting](https://auth0.com/blog/adding-salt-to-hashing-a-better-way-to-store-passwords/)"
+    },
+  
+    // Week 5: Web Application Security (10 questions)
+    {
+      week: 5,
+      topic: "XSS",
+      question: "What is Cross-Site Scripting (XSS)?",
+      options: [
+        "A way to style web pages",
+        "A method to optimize website performance",
+        "An attack that injects malicious scripts into web pages",
+        "A type of SQL injection"
+      ],
+      answer: "An attack that injects malicious scripts into web pages",
+      explanation: "XSS allows attackers to inject client-side scripts into web pages viewed by other users. [XSS](https://owasp.org/www-community/attacks/xss/)"
+    },
+    {
+      week: 5,
+      topic: "SQL Injection",
+      question: "What is the primary defense against SQL injection?",
+      options: [
+        "Input validation",
+        "Using parameterized queries",
+        "HTTPS",
+        "Firewall"
+      ],
+      answer: "Using parameterized queries",
+      explanation: "Parameterized queries separate SQL code from data, preventing injection. [SQL Injection Prevention](https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html)"
+    },
+    {
+      week: 5,
+      topic: "CSRF",
+      question: "What is Cross-Site Request Forgery (CSRF)?",
+      options: [
+        "Stealing user sessions",
+        "Forcing a user to execute unwanted actions on a web application",
+        "Injecting SQL queries",
+        "Stealing cookies"
+      ],
+      answer: "Forcing a user to execute unwanted actions on a web application",
+      explanation: "CSRF tricks users into performing actions they didn't intend to. [CSRF](https://owasp.org/www-community/attacks/csrf)"
+    },
+    {
+      week: 5,
+      topic: "Authentication Flaws",
+      question: "What is the risk of using weak password policies?",
+      options: [
+        "Slower login times",
+        "Increased server load",
+        "Easier brute force attacks",
+        "No risk"
+      ],
+      answer: "Easier brute force attacks",
+      explanation: "Weak passwords are vulnerable to brute force and dictionary attacks. [Password Security](https://owasp.org/www-project-cheat-sheets/cheatsheets/Authentication_Cheat_Sheet.html)"
+    },
+    {
+      week: 5,
+      topic: "OWASP Top 10",
+      question: "What is the OWASP Top 10?",
+      options: [
+        "A list of the most critical web application security risks",
+        "Top 10 programming languages",
+        "A ranking of web browsers",
+        "A list of secure coding practices"
+      ],
+      answer: "A list of the most critical web application security risks",
+      explanation: "The OWASP Top 10 is a standard awareness document for web application security. [OWASP Top 10](https://owasp.org/Top10/)"
+    },
+    {
+      week: 5,
+      topic: "Session Management",
+      question: "What is session hijacking?",
+      options: [
+        "Stealing a user's session ID",
+        "Changing session timeouts",
+        "Creating multiple sessions",
+        "Encrypting session data"
+      ],
+      answer: "Stealing a user's session ID",
+      explanation: "Session hijacking involves stealing a valid session ID to impersonate the user. [Session Hijacking](https://owasp.org/www-community/attacks/Session_hijacking_attack)"
+    },
+    {
+      week: 5,
+      topic: "Security Headers",
+      question: "What is the purpose of the Content Security Policy (CSP) header?",
+      options: [
+        "To compress web content",
+        "To prevent XSS attacks",
+        "To cache web pages",
+        "To authenticate users"
+      ],
+      answer: "To prevent XSS attacks",
+      explanation: "CSP helps prevent XSS by controlling which resources can be loaded. [CSP](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP)"
+    },
+    {
+      week: 5,
+      topic: "File Upload Security",
+      question: "What is a secure way to handle file uploads?",
+      options: [
+        "Allow all file types",
+        "Store files in the web root",
+        "Validate file type and scan for malware",
+        "Use the original filename"
+      ],
+      answer: "Validate file type and scan for malware",
+      explanation: "File uploads should be validated, scanned, and stored securely. [File Upload Security](https://owasp.org/www-community/vulnerabilities/Unrestricted_File_Upload)"
+    },
+    {
+      week: 5,
+      topic: "HTTPS",
+      question: "Why is HTTPS important for web security?",
+      options: [
+        "It makes websites load faster",
+        "It encrypts data in transit",
+        "It prevents XSS attacks",
+        "It blocks SQL injection"
+      ],
+      answer: "It encrypts data in transit",
+      explanation: "HTTPS encrypts data between the user and the server, preventing eavesdropping. [HTTPS](https://www.cloudflare.com/learning/ssl/why-is-http-not-secure/)"
+    },
+    {
+      week: 5,
+      topic: "Security Testing",
+      question: "What is a security misconfiguration?",
+      options: [
+        "Using the latest software versions",
+        "Default credentials or unnecessary services enabled",
+        "Strong password policies",
+        "Regular security audits"
+      ],
+      answer: "Default credentials or unnecessary services enabled",
+      explanation: "Security misconfigurations occur when security settings are not properly implemented. [Security Misconfiguration](https://owasp.org/www-project-top-ten/2017/A6_2017-Security_Misconfiguration)"
+    },
+      // Week 6: Penetration Testing Basics (10 questions)
+  {
+    week: 6,
+    topic: "Kali Linux",
+    question: "What is Kali Linux primarily used for?",
+    options: [
+      "General-purpose operating system",
+      "Penetration testing and security auditing",
+      "Web development",
+      "Data analysis"
+    ],
+    answer: "Penetration testing and security auditing",
+    explanation: "Kali Linux is a Debian-based Linux distribution designed for digital forensics and penetration testing. [Kali Linux](https://www.kali.org/docs/introduction/what-is-kali-linux/)"
+  },
+  {
+    week: 6,
+    topic: "Nmap",
+    question: "What is the purpose of the Nmap tool?",
+    options: [
+      "To encrypt network traffic",
+      "To scan networks for hosts and services",
+      "To create secure passwords",
+      "To analyze malware"
+    ],
+    answer: "To scan networks for hosts and services",
+    explanation: "Nmap (Network Mapper) is a free and open-source tool for network discovery and security auditing. [Nmap](https://nmap.org/)"
+  },
+  {
+    week: 6,
+    topic: "Metasploit",
+    question: "What is the Metasploit Framework used for?",
+    options: [
+      "Developing and executing exploit code",
+      "Creating secure passwords",
+      "Encrypting files",
+      "Blocking network traffic"
+    ],
+    answer: "Developing and executing exploit code",
+    explanation: "Metasploit is a penetration testing framework that makes hacking simple. [Metasploit](https://www.metasploit.com/)"
+  },
+  {
+    week: 6,
+    topic: "Burp Suite",
+    question: "What is the primary use of Burp Suite in web application testing?",
+    options: [
+      "Database management",
+      "Network scanning",
+      "Web application security testing",
+      "Email encryption"
+    ],
+    answer: "Web application security testing",
+    explanation: "Burp Suite is a platform for performing security testing of web applications. [Burp Suite](https://portswigger.net/burp)"
+  },
+  {
+    week: 6,
+    topic: "Vulnerability Scanning",
+    question: "What is the difference between vulnerability scanning and penetration testing?",
+    options: [
+      "They are the same thing",
+      "Scanning identifies vulnerabilities, testing exploits them",
+      "Scanning is illegal, testing is legal",
+      "Testing is automated, scanning is manual"
+    ],
+    answer: "Scanning identifies vulnerabilities, testing exploits them",
+    explanation: "Vulnerability scanning identifies potential vulnerabilities, while penetration testing attempts to exploit them. [Vulnerability Assessment](https://www.rapid7.com/fundamentals/vulnerability-management-and-scanning/)"
+  },
+  {
+    week: 6,
+    topic: "OWASP ZAP",
+    question: "What is OWASP ZAP used for?",
+    options: [
+      "Password cracking",
+      "Network mapping",
+      "Web application security testing",
+      "File encryption"
+    ],
+    answer: "Web application security testing",
+    explanation: "OWASP ZAP (Zed Attack Proxy) is a free security tool for finding vulnerabilities in web applications. [OWASP ZAP](https://www.zaproxy.org/)"
+  },
+  {
+    week: 6,
+    topic: "Ethical Hacking",
+    question: "What is the first phase of ethical hacking?",
+    options: [
+      "Scanning",
+      "Exploitation",
+      "Reconnaissance",
+      "Maintaining access"
+    ],
+    answer: "Reconnaissance",
+    explanation: "The first phase is reconnaissance, which involves gathering information about the target. [Ethical Hacking Phases](https://www.eccouncil.org/ethical-hacking/phases-of-ethical-hacking/)"
+  },
+  {
+    week: 6,
+    topic: "Password Cracking",
+    question: "What is a rainbow table attack?",
+    options: [
+      "A type of phishing attack",
+      "A precomputed table for reversing cryptographic hash functions",
+      "A method for encrypting passwords",
+      "A type of DDoS attack"
+    ],
+    answer: "A precomputed table for reversing cryptographic hash functions",
+    explanation: "Rainbow tables are precomputed tables used to crack password hashes. [Rainbow Table](https://www.cloudflare.com/learning/security/threats/rainbow-table-attack/)"
+  },
+  {
+    week: 6,
+    topic: "Wireless Security",
+    question: "What is WPA3 an improvement over?",
+    options: [
+      "WEP",
+      "WPA2",
+      "Both WEP and WPA2",
+      "None of the above"
+    ],
+    answer: "Both WEP and WPA2",
+    explanation: "WPA3 improves upon both WEP and WPA2 with stronger encryption and security features. [WPA3](https://www.wi-fi.org/discover-wi-fi/security)"
+  },
+  {
+    week: 6,
+    topic: "Penetration Testing",
+    question: "What is the final phase of a penetration test?",
+    options: [
+      "Reporting",
+      "Exploitation",
+      "Scanning",
+      "Reconnaissance"
+    ],
+    answer: "Reporting",
+    explanation: "The final phase is reporting, where findings and recommendations are documented. [Penetration Testing Phases](https://www.synopsys.com/glossary/what-is-penetration-testing.html)"
+  },
+
+  // Week 7: Security Information & Event Management (SIEM) (10 questions)
+  {
+    week: 7,
+    topic: "SIEM",
+    question: "What is the primary purpose of a SIEM system?",
+    options: [
+      "To block network traffic",
+      "To provide real-time analysis of security alerts",
+      "To create backups",
+      "To manage user accounts"
+    ],
+    answer: "To provide real-time analysis of security alerts",
+    explanation: "SIEM systems provide real-time analysis of security alerts generated by network hardware and applications. [SIEM](https://www.ibm.com/security/security-intelligence/siem)"
+  },
+  {
+    week: 7,
+    topic: "Splunk",
+    question: "What is Splunk primarily used for?",
+    options: [
+      "Network scanning",
+      "Searching, monitoring, and analyzing machine-generated data",
+      "Password cracking",
+      "Vulnerability scanning"
+    ],
+    answer: "Searching, monitoring, and analyzing machine-generated data",
+    explanation: "Splunk is a platform for searching, monitoring, and analyzing machine-generated data. [Splunk](https://www.splunk.com/)"
+  },
+  {
+    week: 7,
+    topic: "Log Analysis",
+    question: "What is the purpose of log analysis in cybersecurity?",
+    options: [
+      "To delete unnecessary files",
+      "To identify security incidents and policy violations",
+      "To create user accounts",
+      "To update software"
+    ],
+    answer: "To identify security incidents and policy violations",
+    explanation: "Log analysis helps identify security incidents, policy violations, and operational issues. [Log Analysis](https://www.varonis.com/blog/what-is-log-analysis/)"
+  },
+  {
+    week: 7,
+    topic: "Alerting",
+    question: "What is the purpose of security alerting?",
+    options: [
+      "To notify administrators of potential security incidents",
+      "To update software automatically",
+      "To create backups",
+      "To manage user permissions"
+    ],
+    answer: "To notify administrators of potential security incidents",
+    explanation: "Security alerting notifies administrators of potential security incidents in real-time. [Security Alerting](https://www.atlassian.com/incident-management/incident-response/security-alerting)"
+  },
+  {
+    week: 7,
+    topic: "Incident Response",
+    question: "What is the first step in the incident response process?",
+    options: [
+      "Containment",
+      "Preparation",
+      "Eradication",
+      "Recovery"
+    ],
+    answer: "Preparation",
+    explanation: "Preparation is the first and most critical phase of incident response. [Incident Response](https://www.csoonline.com/article/2120377/incident-response/incident-response-planning-an-introduction.html)"
+  },
+  {
+    week: 7,
+    topic: "Threat Intelligence",
+    question: "What is threat intelligence in cybersecurity?",
+    options: [
+      "Information about potential or current attacks",
+      "A type of antivirus software",
+      "A network protocol",
+      "A programming language"
+    ],
+    answer: "Information about potential or current attacks",
+    explanation: "Threat intelligence is evidence-based knowledge about existing or emerging threats. [Threat Intelligence](https://www.crowdstrike.com/cybersecurity-101/threat-intelligence/)"
+  },
+  {
+    week: 7,
+    topic: "Security Monitoring",
+    question: "What is the purpose of continuous security monitoring?",
+    options: [
+      "To slow down systems",
+      "To detect and respond to threats in real-time",
+      "To create user accounts",
+      "To update software"
+    ],
+    answer: "To detect and respond to threats in real-time",
+    explanation: "Continuous security monitoring helps detect and respond to threats in real-time. [Security Monitoring](https://www.tripwire.com/state-of-security/security-data-protection/cyber-security/continuous-security-monitoring/)"
+  },
+  {
+    week: 7,
+    topic: "Compliance",
+    question: "What is the purpose of compliance monitoring?",
+    options: [
+      "To ensure adherence to security policies and regulations",
+      "To speed up systems",
+      "To create backups",
+      "To manage user accounts"
+    ],
+    answer: "To ensure adherence to security policies and regulations",
+    explanation: "Compliance monitoring ensures adherence to security policies and regulatory requirements. [Compliance Monitoring](https://www.digitalguardian.com/blog/what-compliance-monitoring-definition-best-practices-challenges-and-more)"
+  },
+  {
+    week: 7,
+    topic: "Forensics",
+    question: "What is digital forensics in cybersecurity?",
+    options: [
+      "The process of investigating digital devices for evidence",
+      "Creating secure passwords",
+      "Blocking network traffic",
+      "Updating software"
+    ],
+    answer: "The process of investigating digital devices for evidence",
+    explanation: "Digital forensics involves the recovery and investigation of material found in digital devices. [Digital Forensics](https://www.guru99.com/digital-forensics.html)"
+  },
+  {
+    week: 7,
+    topic: "SOC",
+    question: "What is a Security Operations Center (SOC)?",
+    options: [
+      "A facility that houses an information security team",
+      "A type of firewall",
+      "A network protocol",
+      "A programming language"
+    ],
+    answer: "A facility that houses an information security team",
+    explanation: "A SOC is a centralized unit that deals with security issues on an organizational and technical level. [SOC](https://www.cisco.com/c/en/us/products/security/security-operations-center-soc/index.html)"
+  },
+
+  // Week 8: Incident Response & Forensics (10 questions)
+  {
+    week: 8,
+    topic: "Incident Response",
+    question: "What is the first step in the incident response lifecycle?",
+    options: [
+      "Containment",
+      "Preparation",
+      "Eradication",
+      "Recovery"
+    ],
+    answer: "Preparation",
+    explanation: "Preparation is the first and most critical phase of the incident response lifecycle. [Incident Response Lifecycle](https://www.csoonline.com/article/2120377/incident-response/incident-response-planning-an-introduction.html)"
+  },
+  {
+    week: 8,
+    topic: "Disk Forensics",
+    question: "What is the purpose of disk forensics?",
+    options: [
+      "To recover data from storage devices",
+      "To create backups",
+      "To update software",
+      "To manage user accounts"
+    ],
+    answer: "To recover data from storage devices",
+    explanation: "Disk forensics involves the extraction of information from storage devices. [Disk Forensics](https://www.guru99.com/disk-forensics.html)"
+  },
+  {
+    week: 8,
+    topic: "Memory Analysis",
+    question: "What is the purpose of memory forensics?",
+    options: [
+      "To analyze volatile data in a computer's memory",
+      "To create secure passwords",
+      "To block network traffic",
+      "To update software"
+    ],
+    answer: "To analyze volatile data in a computer's memory",
+    explanation: "Memory forensics involves analyzing volatile data in a computer's memory dump. [Memory Forensics](https://www.sans.org/white-papers/34172/)"
+  },
+  {
+    week: 8,
+    topic: "Chain of Custody",
+    question: "What is the purpose of maintaining a chain of custody?",
+    options: [
+      "To track the handling of evidence",
+      "To create backups",
+      "To manage user accounts",
+      "To update software"
+    ],
+    answer: "To track the handling of evidence",
+    explanation: "Chain of custody documents the chronological documentation of evidence. [Chain of Custody](https://www.forensicscolleges.com/blog/cybersecurity/chain-of-custody-digital-forensics)"
+  },
+  {
+    week: 8,
+    topic: "Incident Classification",
+    question: "What is the purpose of incident classification?",
+    options: [
+      "To categorize security incidents by severity and type",
+      "To create secure passwords",
+      "To block network traffic",
+      "To update software"
+    ],
+    answer: "To categorize security incidents by severity and type",
+    explanation: "Incident classification helps prioritize and respond to security incidents effectively. [Incident Classification](https://www.csoonline.com/article/2124030/incident-response/incident-response-definition-process-and-plan.html)"
+  },
+  {
+    week: 8,
+    topic: "Forensic Imaging",
+    question: "What is the purpose of creating a forensic image?",
+    options: [
+      "To create an exact, bit-by-bit copy of a storage device",
+      "To create backups",
+      "To manage user accounts",
+      "To update software"
+    ],
+    answer: "To create an exact, bit-by-bit copy of a storage device",
+    explanation: "Forensic imaging creates an exact, unaltered copy of a storage device. [Forensic Imaging](https://www.guidancesoftware.com/computer-forensics-software/forensic-imaging)"
+  },
+  {
+    week: 8,
+    topic: "Incident Documentation",
+    question: "Why is documentation important in incident response?",
+    options: [
+      "To provide a record of actions taken during an incident",
+      "To create secure passwords",
+      "To block network traffic",
+      "To update software"
+    ],
+    answer: "To provide a record of actions taken during an incident",
+    explanation: "Documentation provides a record of actions taken during an incident for future reference. [Incident Documentation](https://www.csoonline.com/article/2124030/incident-response/incident-response-definition-process-and-plan.html)"
+  },
+  {
+    week: 8,
+    topic: "Malware Analysis",
+    question: "What is the purpose of malware analysis in incident response?",
+    options: [
+      "To understand the nature of malicious software",
+      "To create backups",
+      "To manage user accounts",
+      "To update software"
+    ],
+    answer: "To understand the nature of malicious software",
+    explanation: "Malware analysis helps understand the behavior and purpose of malicious software. [Malware Analysis](https://www.crowdstrike.com/cybersecurity-101/malware/malware-analysis/)"
+  },
+  {
+    week: 8,
+    topic: "Incident Recovery",
+    question: "What is the purpose of the recovery phase in incident response?",
+    options: [
+      "To restore systems and data to normal operation",
+      "To create secure passwords",
+      "To block network traffic",
+      "To update software"
+    ],
+    answer: "To restore systems and data to normal operation",
+    explanation: "The recovery phase focuses on restoring systems and data to normal operation. [Incident Recovery](https://www.csoonline.com/article/2124030/incident-response/incident-response-definition-process-and-plan.html)"
+  },
+  {
+    week: 8,
+    topic: "Post-Incident Review",
+    question: "What is the purpose of a post-incident review?",
+    options: [
+      "To identify lessons learned and improve security",
+      "To create backups",
+      "To manage user accounts",
+      "To update software"
+    ],
+    answer: "To identify lessons learned and improve security",
+    explanation: "Post-incident reviews help identify lessons learned and improve security posture. [Post-Incident Review](https://www.csoonline.com/article/2124030/incident-response/incident-response-definition-process-and-plan.html)"
+  },
+    // Week 9: Cloud Security & Compliance (10 questions)
+    {
+      week: 9,
+      topic: "Cloud Security",
+      question: "What is the shared responsibility model in cloud security?",
+      options: [
+        "Only the cloud provider is responsible for security",
+        "Only the customer is responsible for security",
+        "Security responsibilities are shared between cloud provider and customer",
+        "Security is managed by a third-party"
+      ],
+      answer: "Security responsibilities are shared between cloud provider and customer",
+      explanation: "The shared responsibility model defines what security tasks are handled by the cloud provider and which are handled by the customer. [Shared Responsibility Model](https://aws.amazon.com/compliance/shared-responsibility-model/)"
+    },
+    {
+      week: 9,
+      topic: "AWS Security",
+      question: "What is AWS IAM used for?",
+      options: [
+        "Managing virtual machines",
+        "Storing files in the cloud",
+        "Managing user access and permissions",
+        "Monitoring network traffic"
+      ],
+      answer: "Managing user access and permissions",
+      explanation: "AWS Identity and Access Management (IAM) enables you to manage access to AWS services and resources securely. [AWS IAM](https://aws.amazon.com/iam/)"
+    },
+    {
+      week: 9,
+      topic: "GDPR",
+      question: "What is the primary purpose of GDPR?",
+      options: [
+        "To regulate cloud computing",
+        "To protect personal data and privacy in the EU",
+        "To standardize network protocols",
+        "To certify security professionals"
+      ],
+      answer: "To protect personal data and privacy in the EU",
+      explanation: "The General Data Protection Regulation (GDPR) is a regulation on data protection and privacy in the European Union. [GDPR](https://gdpr.eu/what-is-gdpr/)"
+    },
+    {
+      week: 9,
+      topic: "Container Security",
+      question: "What is the purpose of a container image vulnerability scan?",
+      options: [
+        "To increase container performance",
+        "To identify known security vulnerabilities in container images",
+        "To encrypt container data",
+        "To create container backups"
+      ],
+      answer: "To identify known security vulnerabilities in container images",
+      explanation: "Container image scanning helps identify and fix vulnerabilities before deployment. [Container Security](https://www.aquasec.com/cloud-native-academy/container-security/container-image-scanning/)"
+    },
+    {
+      week: 9,
+      topic: "Zero Trust",
+      question: "What is the core principle of Zero Trust security?",
+      options: [
+        "Trust but verify",
+        "Never trust, always verify",
+        "Trust internal networks by default",
+        "Verify only for external access"
+      ],
+      answer: "Never trust, always verify",
+      explanation: "Zero Trust assumes that threats exist both outside and inside the network, requiring verification for every access request. [Zero Trust](https://www.crowdstrike.com/cybersecurity-101/zero-trust-security/)"
+    },
+    {
+      week: 9,
+      topic: "HIPAA",
+      question: "What type of data does HIPAA protect?",
+      options: [
+        "Financial transactions",
+        "Personally Identifiable Information (PII)",
+        "Protected Health Information (PHI)",
+        "Intellectual property"
+      ],
+      answer: "Protected Health Information (PHI)",
+      explanation: "The Health Insurance Portability and Accountability Act (HIPAA) protects sensitive patient health information. [HIPAA](https://www.hhs.gov/hipaa/for-professionals/privacy/laws-regulations/index.html)"
+    },
+    {
+      week: 9,
+      topic: "Cloud Security Posture Management",
+      question: "What is CSPM used for?",
+      options: [
+        "Managing cloud storage",
+        "Monitoring and managing cloud security posture",
+        "Creating virtual machines",
+        "Managing domain names"
+      ],
+      answer: "Monitoring and managing cloud security posture",
+      explanation: "Cloud Security Posture Management (CSPM) helps identify and remediate risks in cloud infrastructure. [CSPM](https://www.gartner.com/en/information-technology/glossary/cloud-security-posture-management-cspm)"
+    },
+    {
+      week: 9,
+      topic: "PCI DSS",
+      question: "What is the purpose of PCI DSS compliance?",
+      options: [
+        "To protect credit card data",
+        "To secure email communications",
+        "To encrypt network traffic",
+        "To manage user identities"
+      ],
+      answer: "To protect credit card data",
+      explanation: "Payment Card Industry Data Security Standard (PCI DSS) ensures secure handling of credit card information. [PCI DSS](https://www.pcisecuritystandards.org/pci_security/)"
+    },
+    {
+      week: 9,
+      topic: "Serverless Security",
+      question: "What is a key security consideration for serverless applications?",
+      options: [
+        "Operating system patches",
+        "Function-level permissions",
+        "Network segmentation",
+        "Physical server security"
+      ],
+      answer: "Function-level permissions",
+      explanation: "In serverless, each function should have the minimum permissions needed to perform its task. [Serverless Security](https://www.datadoghq.com/knowledge-center/serverless/security-best-practices/)"
+    },
+    {
+      week: 9,
+      topic: "Cloud Access Security Broker",
+      question: "What is the primary function of a CASB?",
+      options: [
+        "To provide internet bandwidth",
+        "To enforce security policies between cloud service users and cloud applications",
+        "To manage virtual machines",
+        "To create cloud backups"
+      ],
+      answer: "To enforce security policies between cloud service users and cloud applications",
+      explanation: "Cloud Access Security Brokers (CASBs) help enforce security policies as cloud-based resources are accessed. [CASB](https://www.cisco.com/c/en/us/products/security/cloud-access-security-broker-casb/index.html)"
+    },
+  
+    // Week 10: Advanced Cybersecurity Topics (10 questions)
+    {
+      week: 10,
+      topic: "Threat Hunting",
+      question: "What is the primary goal of threat hunting?",
+      options: [
+        "To wait for security alerts",
+        "To actively search for threats that evade existing security solutions",
+        "To analyze past security incidents",
+        "To create security policies"
+      ],
+      answer: "To actively search for threats that evade existing security solutions",
+      explanation: "Threat hunting is the proactive search for cyber threats that evade existing security solutions. [Threat Hunting](https://www.crowdstrike.com/cybersecurity-101/threat-hunting/)"
+    },
+    {
+      week: 10,
+      topic: "AI in Cybersecurity",
+      question: "How is AI used in cybersecurity?",
+      options: [
+        "Only for automating repetitive tasks",
+        "For detecting anomalies and potential threats in real-time",
+        "Only for generating security reports",
+        "Only for managing user accounts"
+      ],
+      answer: "For detecting anomalies and potential threats in real-time",
+      explanation: "AI helps identify patterns and anomalies that may indicate security threats. [AI in Cybersecurity](https://www.ibm.com/security/artificial-intelligence)"
+    },
+    {
+      week: 10,
+      topic: "IoT Security",
+      question: "What is a major security challenge with IoT devices?",
+      options: [
+        "High cost",
+        "Limited processing power for security features",
+        "Incompatibility with networks",
+        "Large physical size"
+      ],
+      answer: "Limited processing power for security features",
+      explanation: "Many IoT devices have limited processing power, making it challenging to implement robust security measures. [IoT Security](https://www.csoonline.com/article/3253708/what-is-iot-security-how-to-protect-iot-devices.html)"
+    },
+    {
+      week: 10,
+      topic: "Blockchain Security",
+      question: "What is a 51% attack in blockchain?",
+      options: [
+        "When a user controls more than 50% of the network's mining power",
+        "When 51% of nodes agree on a transaction",
+        "When 51% of users approve a new feature",
+        "When a blockchain reaches 51% of its maximum size"
+      ],
+      answer: "When a user controls more than 50% of the network's mining power",
+      explanation: "A 51% attack occurs when a single entity gains control of the majority of the network's mining power. [51% Attack](https://www.investopedia.com/terms/1/51-attack.asp)"
+    },
+    {
+      week: 10,
+      topic: "Zero-Day Vulnerabilities",
+      question: "What is a zero-day vulnerability?",
+      options: [
+        "A vulnerability that is fixed within 24 hours",
+        "A vulnerability that is publicly known but has no patch available",
+        "A vulnerability that affects only new software",
+        "A vulnerability that requires zero user interaction"
+      ],
+      answer: "A vulnerability that is publicly known but has no patch available",
+      explanation: "Zero-day vulnerabilities are unknown to the vendor and have no available patch when discovered. [Zero-Day](https://www.crowdstrike.com/cybersecurity-101/zero-day-exploit/)"
+    },
+    {
+      week: 10,
+      topic: "Deception Technology",
+      question: "What is the purpose of deception technology?",
+      options: [
+        "To trick attackers into revealing themselves",
+        "To encrypt all network traffic",
+        "To block all incoming connections",
+        "To create secure backups"
+      ],
+      answer: "To trick attackers into revealing themselves",
+      explanation: "Deception technology uses decoys and traps to detect and study attackers. [Deception Technology](https://www.gartner.com/en/information-technology/glossary/deception-technology)"
+    },
+    {
+      week: 10,
+      topic: "Quantum Computing",
+      question: "How does quantum computing affect current encryption methods?",
+      options: [
+        "It makes all encryption stronger",
+        "It could break many current encryption algorithms",
+        "It has no effect on encryption",
+        "It only affects wireless encryption"
+      ],
+      answer: "It could break many current encryption algorithms",
+      explanation: "Quantum computers could potentially break widely used encryption algorithms like RSA and ECC. [Quantum Computing & Encryption](https://www.ibm.com/quantum-computing/learn/what-is-quantum-computing/)"
+    },
+    {
+      week: 10,
+      topic: "Threat Intelligence",
+      question: "What is the difference between threat intelligence and threat data?",
+      options: [
+        "There is no difference",
+        "Threat data is raw, threat intelligence is processed and analyzed",
+        "Threat intelligence is only about malware",
+        "Threat data is only for government use"
+      ],
+      answer: "Threat data is raw, threat intelligence is processed and analyzed",
+      explanation: "Threat data becomes threat intelligence when it's processed, analyzed, and given context. [Threat Intelligence](https://www.recordedfuture.com/threat-intelligence-definition)"
+    },
+    {
+      week: 10,
+      topic: "DevSecOps",
+      question: "What is the main goal of DevSecOps?",
+      options: [
+        "To separate security from development",
+        "To integrate security into the DevOps pipeline",
+        "To slow down the development process",
+        "To replace security teams"
+      ],
+      answer: "To integrate security into the DevOps pipeline",
+      explanation: "DevSecOps integrates security practices within the DevOps process. [DevSecOps](https://www.redhat.com/en/topics/devops/what-is-devsecops)"
+    },
+    {
+      week: 10,
+      topic: "Cybersecurity Career",
+      question: "What is the most important skill for a cybersecurity professional?",
+      options: [
+        "Programming expertise",
+        "Continuous learning and adaptability",
+        "Network administration",
+        "Public speaking"
+      ],
+      answer: "Continuous learning and adaptability",
+      explanation: "The cybersecurity landscape constantly evolves, making continuous learning essential. [Cybersecurity Skills](https://www.cyberseek.org/pathway/cybersecurity)"
+    }
 ];

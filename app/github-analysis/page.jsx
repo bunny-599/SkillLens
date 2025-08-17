@@ -10,6 +10,12 @@ import {
   TrendingUp,
   RefreshCcw,
   Search,
+  Brain,
+  Zap,
+  AlertTriangle,
+  X,
+  Lightbulb,
+  CheckCircle,
 } from "lucide-react";
 
 const GitHubAnalysisPage = () => {
@@ -20,6 +26,31 @@ const GitHubAnalysisPage = () => {
   const [existingSummary, setExistingSummary] = useState(null);
   const [loadingSummary, setLoadingSummary] = useState(true);
 
+  const [aiAnalysis, setAiAnalysis] = useState(null);
+  const [loadingAI, setLoadingAI] = useState(false);
+
+const getAIAnalysis = async () => {
+  if (!existingSummary) return;
+
+  setLoadingAI(true);
+  try {
+    const res = await fetch(`/api/github-analysis?username=${existingSummary.githubUsername}&role=${selectedRole}&analyze=true`);
+    const data = await res.json();
+
+    if (data.analysis) {
+      setAiAnalysis(data.analysis);
+      // Save to localStorage
+      localStorage.setItem("ai_analysis", JSON.stringify(data.analysis));
+    }
+  } catch (error) {
+    console.error("AI analysis failed:", error);
+    alert("Failed to get AI analysis. Please try again.");
+  } finally {
+    setLoadingAI(false);
+  }
+};
+
+
   // Load stored preferences
   useEffect(() => {
     const storedUsername = localStorage.getItem("github_username");
@@ -29,35 +60,46 @@ const GitHubAnalysisPage = () => {
   }, []);
 
   // Load existing summary from database
-  useEffect(() => {
-    const loadExistingSummary = async () => {
-      setLoadingSummary(true);
-      try {
-        const response = await fetch("/api/get-user-summary");
-        if (response.ok) {
-          const data = await response.json();
-          if (data.summary && data.summary.s && data.summary.r) {
-            setExistingSummary({
-              username: data.summary.u,
-              summary: data.summary.s,
-              repos: data.summary.r,
-              githubUsername: data.githubUsername,
-            });
-            // Auto-fill username if we have it
-            if (data.githubUsername && !username) {
-              setUsername(data.githubUsername);
+// Update your existing useEffect that loads existing summary
+useEffect(() => {
+  const loadExistingSummary = async () => {
+    setLoadingSummary(true);
+    try {
+      const response = await fetch("/api/get-user-summary");
+      if (response.ok) {
+        const data = await response.json();
+        if (data.summary && data.summary.s && data.summary.r) {
+          setExistingSummary({
+            username: data.summary.u,
+            summary: data.summary.s,
+            repos: data.summary.r,
+            githubUsername: data.githubUsername,
+          });
+          // Auto-fill username if we have it
+          if (data.githubUsername && !username) {
+            setUsername(data.githubUsername);
+          }
+
+          // Load and show AI analysis from localStorage
+          const storedAIAnalysis = localStorage.getItem("ai_analysis");
+          if (storedAIAnalysis) {
+            try {
+              setAiAnalysis(JSON.parse(storedAIAnalysis));
+            } catch (error) {
+              console.error("Error parsing AI analysis:", error);
             }
           }
         }
-      } catch (error) {
-        console.error("Error loading existing summary:", error);
-      } finally {
-        setLoadingSummary(false);
       }
-    };
+    } catch (error) {
+      console.error("Error loading existing summary:", error);
+    } finally {
+      setLoadingSummary(false);
+    }
+  };
 
-    loadExistingSummary();
-  }, []);
+  loadExistingSummary();
+}, []);
 
   const handleAnalyze = async () => {
     if (!username.trim()) return;
@@ -347,6 +389,90 @@ const GitHubAnalysisPage = () => {
               Your GitHub profile has been analyzed and saved. The summary above
               has been updated with your latest data.
             </p>
+          </div>
+        )}
+        {existingSummary && (
+          <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-2xl border border-gray-700/50 overflow-hidden">
+            <div className="bg-gradient-to-r from-purple-900/30 to-pink-900/30 p-6 border-b border-gray-700/50">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-purple-500/20 rounded-lg">
+                    <Brain className="h-6 w-6 text-purple-400" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-white">AI Career Analysis</h2>
+                    <p className="text-gray-300">For {selectedRole} role</p>
+                  </div>
+                </div>
+                <button
+                  onClick={getAIAnalysis}
+                  disabled={loadingAI}
+                  className="flex items-center space-x-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loadingAI ? (
+                    <>
+                      <RefreshCcw className="animate-spin h-4 w-4" />
+                      <span>Analyzing...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="h-4 w-4" />
+                      <span>Get AI Analysis</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {aiAnalysis ? (
+              <div className="p-6 space-y-6">
+                {/* Issues Section */}
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-3 flex items-center">
+                    <AlertTriangle className="h-5 w-5 mr-2 text-red-400" />
+                    Key Issues to Address
+                  </h3>
+                  <div className="space-y-2">
+                    {aiAnalysis.issues.map((issue, index) => (
+                      <div key={index} className="bg-red-900/20 border border-red-500/30 rounded-lg p-3">
+                        <div className="flex items-start space-x-2">
+                          <X className="h-4 w-4 text-red-400 mt-0.5 flex-shrink-0" />
+                          <span className="text-red-200 text-sm">{issue}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Tips Section */}
+                <div>
+                  <h3 className="text-lg font-semibold text-white mb-3 flex items-center">
+                    <Lightbulb className="h-5 w-5 mr-2 text-yellow-400" />
+                    Improvement Tips
+                  </h3>
+                  <div className="space-y-2">
+                    {aiAnalysis.tips.map((tip, index) => (
+                      <div key={index} className="bg-green-900/20 border border-green-500/30 rounded-lg p-3">
+                        <div className="flex items-start space-x-2">
+                          <CheckCircle className="h-4 w-4 text-green-400 mt-0.5 flex-shrink-0" />
+                          <span className="text-green-200 text-sm">{tip}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="p-8 text-center">
+                <div className="p-4 bg-gray-700/30 rounded-full w-20 h-20 mx-auto mb-4 flex items-center justify-center">
+                  <Brain className="h-10 w-10 text-gray-400" />
+                </div>
+                <h3 className="text-xl font-semibold text-white mb-2">Ready for AI Analysis</h3>
+                <p className="text-gray-400">
+                  Click "Get AI Analysis" above to get personalized feedback and improvement tips for your {selectedRole} career path.
+                </p>
+              </div>
+            )}
           </div>
         )}
       </div>

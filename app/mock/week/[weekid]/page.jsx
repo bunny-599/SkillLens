@@ -4,7 +4,8 @@ import { CheckCircle, XCircle, Clock, BookOpen, Target, Trophy, RotateCcw, Arrow
 import { useParams, useSearchParams } from 'next/navigation';
 
 // Import your MCQ datasets - replace these imports with your actual data files
-import { aiMlMcqs, DataAnaMCQ, mcqsWebdev } from '@/data/mockQuesitons';
+import { mcqsWebdev, aiMlMcqs,cyberMCQ, DataAnaMCQ } from '@/data/mockQuesitons';
+import { mobiledevMCQ, cloudMcqs, gameMcqs, blockchainMcqs } from '@/data/mockQuestions2';
 // import { mcqsAIML } from '@/data/mcqsAIML';
 // import { mcqsDevops } from '@/data/mcqsDevops';
 // ... import other roadmap MCQs
@@ -15,8 +16,12 @@ import { aiMlMcqs, DataAnaMCQ, mcqsWebdev } from '@/data/mockQuesitons';
 const allMCQs = {
   'webdeveloper': mcqsWebdev,
   'ai/mlengineer': aiMlMcqs,
-  // 'devops': mcqsDevops,
+  'CybersecurityAnalyst': cyberMCQ,
   'datascience': DataAnaMCQ,
+  'MobileAppDeveloper': mobiledevMCQ,
+  'CloudDevOpsEngineer': cloudMcqs,
+  'GameDeveloper': gameMcqs,
+  'BlockchainDeveloper': blockchainMcqs,
   // ... other roadmaps
 };
 
@@ -26,7 +31,12 @@ const getRoadmapKey = (roadmapName) => {
     'Frontend Developer': 'webdeveloper',
     'AI/ML Engineer': 'ai/mlengineer',
     'Data Scientist': 'datascience',
-    'Backend Developer': 'webdeveloper', // assuming same as webdev for now
+    'MobileAppDeveloper': 'MobileAppDeveloper',
+    'CybersecurityAnalyst': 'CybersecurityAnalyst',
+    'CloudDevOpsEngineer': 'CloudDevOpsEngineer',
+    'GameDeveloper': 'GameDeveloper',
+    'BlockchainDeveloper': 'BlockchainDeveloper',
+    'UI/UX Designer': 'uiuxdesigner',
     // Add more mappings as needed
   };
   return mappings[roadmapName] || roadmapName.toLowerCase().replace(/[^a-z0-9]/g, '');
