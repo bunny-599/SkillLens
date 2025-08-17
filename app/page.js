@@ -36,7 +36,7 @@ function TestimonialsSection() {
             Success Stories
           </h2>
           <p className="text-gray-400 text-lg max-w-2xl mx-auto">
-            Join thousands of students who've transformed their interview skills
+            Join thousands of students who have transformed their interview skills
           </p>
         </div>
         
@@ -54,7 +54,7 @@ function TestimonialsSection() {
                 
                 {/* Testimonial text */}
                 <p className="text-gray-300 text-sm leading-relaxed mb-6 group-hover:text-white transition-colors">
-                  "{t.quote}"
+                  {t.quote}
                 </p>
                 
                 {/* Rating stars */}
