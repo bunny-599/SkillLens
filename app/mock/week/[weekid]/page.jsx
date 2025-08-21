@@ -6,9 +6,7 @@ import { useParams, useSearchParams } from 'next/navigation';
 // Import your MCQ datasets - replace these imports with your actual data files
 import { mcqsWebdev, aiMlMcqs,cyberMCQ, DataAnaMCQ } from '@/data/mockQuesitons';
 import { mobiledevMCQ, cloudMcqs, gameMcqs, blockchainMcqs } from '@/data/mockQuestions2';
-// import { mcqsAIML } from '@/data/mcqsAIML';
-// import { mcqsDevops } from '@/data/mcqsDevops';
-// ... import other roadmap MCQs
+import { uiuxMCQ } from '@/data/mockdata3';
 
 
 
@@ -22,6 +20,7 @@ const allMCQs = {
   'CloudDevOpsEngineer': cloudMcqs,
   'GameDeveloper': gameMcqs,
   'BlockchainDeveloper': blockchainMcqs,
+  'UIUXDesigner':uiuxMCQ
   // ... other roadmaps
 };
 
@@ -36,7 +35,7 @@ const getRoadmapKey = (roadmapName) => {
     'CloudDevOpsEngineer': 'CloudDevOpsEngineer',
     'GameDeveloper': 'GameDeveloper',
     'BlockchainDeveloper': 'BlockchainDeveloper',
-    'UI/UX Designer': 'uiuxdesigner',
+    'UI/UXDesigner': 'UIUXDesigner',
     // Add more mappings as needed
   };
   return mappings[roadmapName] || roadmapName.toLowerCase().replace(/[^a-z0-9]/g, '');

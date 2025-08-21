@@ -4,8 +4,8 @@ import mongoose from "mongoose";
 
 // ------------------- User Schema -------------------
 const userSchema = new mongoose.Schema({
-  userId: { type: String, required: true, unique: true }, // Clerk User ID
-  githubUsername: { type: String }, // GitHub username for regenerating summaries
+  userId: { type: String, required: true, unique: true },
+  githubUsername: { type: String },
   summary: { type: Object, default: {} },
   interviewScores: { type: [Number], default: [] },
   roadmapProgress: {
@@ -18,21 +18,145 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.models.User || mongoose.model("User", userSchema);
 
+// ------------------- Cache Schema -------------------
+const cacheSchema = new mongoose.Schema({
+  key: { type: String, required: true, unique: true },
+  data: { type: Object, required: true },
+  expiresAt: { type: Date, required: true, index: { expireAfterSeconds: 0 } }
+});
+
+const Cache = mongoose.models.Cache || mongoose.model("Cache", cacheSchema);
+
 // ------------------- DB Connect -------------------
+let isConnected = false;
+
 async function connectDB() {
-  if (mongoose.connection.readyState === 0) {
-    await mongoose.connect(process.env.MONGO_URI);
+  if (isConnected) return;
+  
+  if (mongoose.connection.readyState === 1) {
+    isConnected = true;
+    return;
+  }
+  
+  try {
+    await mongoose.connect(process.env.MONGO_URI, {
+      maxPoolSize: 10,
+      serverSelectionTimeoutMS: 5000,
+      socketTimeoutMS: 45000,
+    });
+    isConnected = true;
+    console.log("✅ MongoDB connected");
+  } catch (error) {
+    console.error("❌ MongoDB connection error:", error);
+    throw error;
   }
 }
 
+// ------------------- Rate Limiting -------------------
+const rateLimits = new Map();
+
+function checkRateLimit(ip, limit = 100, window = 3600000) { // 100 requests per hour
+  const now = Date.now();
+  const key = `${ip}:${Math.floor(now / window)}`;
+  
+  const current = rateLimits.get(key) || 0;
+  if (current >= limit) {
+    return false;
+  }
+  
+  rateLimits.set(key, current + 1);
+  
+  // Clean old entries
+  if (rateLimits.size > 1000) {
+    const cutoff = Math.floor(now / window) - 1;
+    for (const [k, _] of rateLimits) {
+      if (k.split(':')[1] < cutoff) {
+        rateLimits.delete(k);
+      }
+    }
+  }
+  
+  return true;
+}
+
 // ------------------- GitHub API Utils -------------------
-const BASE_URL = "https://api.github.com/users";
+const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+const BASE_URL = "https://api.github.com";
+
+const githubHeaders = {
+  'Authorization': `Bearer ${GITHUB_TOKEN}`,
+  'Accept': 'application/vnd.github.v3+json',
+  'User-Agent': 'GitHub-Profile-Analyzer'
+};
+
+// Cache utilities
+async function getCachedData(key) {
+  try {
+    await connectDB();
+    const cached = await Cache.findOne({ key, expiresAt: { $gt: new Date() } });
+    return cached?.data || null;
+  } catch (error) {
+    console.error("Cache read error:", error);
+    return null;
+  }
+}
+
+async function setCachedData(key, data, ttlMinutes = 60) {
+  try {
+    await connectDB();
+    const expiresAt = new Date(Date.now() + ttlMinutes * 60 * 1000);
+    await Cache.findOneAndUpdate(
+      { key },
+      { data, expiresAt },
+      { upsert: true }
+    );
+  } catch (error) {
+    console.error("Cache write error:", error);
+  }
+}
+
+// Optimized GitHub API calls with retry logic
+async function fetchWithRetry(url, retries = 3) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const response = await fetch(url, { 
+        headers: githubHeaders,
+        timeout: 10000 
+      });
+      
+      if (response.status === 403) {
+        const resetTime = response.headers.get('x-ratelimit-reset');
+        if (resetTime) {
+          const waitTime = (parseInt(resetTime) * 1000) - Date.now();
+          if (waitTime > 0 && waitTime < 60000) { // Wait max 1 minute
+            await new Promise(resolve => setTimeout(resolve, Math.min(waitTime, 60000)));
+            continue;
+          }
+        }
+        throw new Error('GitHub rate limit exceeded');
+      }
+      
+      if (!response.ok) {
+        throw new Error(`GitHub API error: ${response.status}`);
+      }
+      
+      return await response.json();
+    } catch (error) {
+      if (i === retries - 1) throw error;
+      await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+    }
+  }
+}
 
 const fetchGitHubProfile = async (username) => {
+  const cacheKey = `profile:${username}`;
+  const cached = await getCachedData(cacheKey);
+  if (cached) return cached;
+
   try {
-    const res = await fetch(`${BASE_URL}/${username}`);
-    if (!res.ok) throw new Error("Profile fetch failed");
-    return await res.json();
+    const profile = await fetchWithRetry(`${BASE_URL}/users/${username}`);
+    await setCachedData(cacheKey, profile, 120); // Cache for 2 hours
+    return profile;
   } catch (error) {
     console.error("Error fetching profile:", error);
     return null;
@@ -40,29 +164,83 @@ const fetchGitHubProfile = async (username) => {
 };
 
 const fetchGitHubRepos = async (username) => {
+  const cacheKey = `repos:${username}`;
+  const cached = await getCachedData(cacheKey);
+  if (cached) return cached;
+
   try {
-    const res = await fetch(`${BASE_URL}/${username}/repos?per_page=100`);
-    if (!res.ok) throw new Error("Repo fetch failed");
-    return await res.json();
+    // Fetch first 100 repos, sorted by updated
+    const repos = await fetchWithRetry(`${BASE_URL}/users/${username}/repos?per_page=100&sort=updated`);
+    await setCachedData(cacheKey, repos, 60); // Cache for 1 hour
+    return repos;
   } catch (error) {
     console.error("Error fetching repos:", error);
     return [];
   }
 };
 
-const fetchRepoLanguages = async (owner, repo) => {
-  try {
-    const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/languages`);
-    if (!res.ok) return {};
-    return await res.json();
-  } catch (error) {
-    console.error("Error fetching languages for repo:", repo, error);
-    return {};
+// Optimized: Fetch multiple repo languages in parallel with batching
+const fetchMultipleRepoLanguages = async (username, repoNames) => {
+  const BATCH_SIZE = 10; // Process in batches to avoid overwhelming the API
+  const results = {};
+  
+  // Check cache first
+  const cachedResults = await Promise.all(
+    repoNames.map(async (repoName) => {
+      const cacheKey = `langs:${username}:${repoName}`;
+      const cached = await getCachedData(cacheKey);
+      return { repoName, data: cached };
+    })
+  );
+  
+  const toFetch = [];
+  cachedResults.forEach(({ repoName, data }) => {
+    if (data) {
+      results[repoName] = data;
+    } else {
+      toFetch.push(repoName);
+    }
+  });
+  
+  // Fetch missing data in batches
+  for (let i = 0; i < toFetch.length; i += BATCH_SIZE) {
+    const batch = toFetch.slice(i, i + BATCH_SIZE);
+    
+    const batchPromises = batch.map(async (repoName) => {
+      try {
+        const languages = await fetchWithRetry(`${BASE_URL}/repos/${username}/${repoName}/languages`);
+        
+        // Cache the result
+        const cacheKey = `langs:${username}:${repoName}`;
+        await setCachedData(cacheKey, languages, 180); // Cache for 3 hours
+        
+        return { repoName, languages };
+      } catch (error) {
+        console.error(`Error fetching languages for ${repoName}:`, error);
+        return { repoName, languages: {} };
+      }
+    });
+    
+    const batchResults = await Promise.all(batchPromises);
+    batchResults.forEach(({ repoName, languages }) => {
+      results[repoName] = languages;
+    });
+    
+    // Small delay between batches to be nice to the API
+    if (i + BATCH_SIZE < toFetch.length) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
   }
+  
+  return results;
 };
 
-// ------------------- Gemini Analysis -------------------
+// ------------------- Gemini Analysis (with caching) -------------------
 const analyzeWithGemini = async (githubSummary, targetRole) => {
+  const cacheKey = `analysis:${githubSummary.u}:${targetRole}`;
+  const cached = await getCachedData(cacheKey);
+  if (cached) return cached;
+
   const prompt = `Analyze this GitHub profile for a ${targetRole} role:
 
 Username: ${githubSummary.u}
@@ -85,15 +263,9 @@ Be direct and honest. Keep it short.`;
   try {
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${process.env.GEMINI_API_KEY}`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        contents: [{
-          parts: [{
-            text: prompt
-          }]
-        }],
+        contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
           temperature: 0.7,
           maxOutputTokens: 500,
@@ -108,10 +280,11 @@ Be direct and honest. Keep it short.`;
     const data = await response.json();
     const analysisText = data.candidates[0].content.parts[0].text;
     
-    // Extract JSON from the response
     const jsonMatch = analysisText.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
-      return JSON.parse(jsonMatch[0]);
+      const analysis = JSON.parse(jsonMatch[0]);
+      await setCachedData(cacheKey, analysis, 30); // Cache for 30 minutes
+      return analysis;
     } else {
       throw new Error("Invalid response from Gemini");
     }
@@ -122,76 +295,106 @@ Be direct and honest. Keep it short.`;
   }
 };
 
-// ------------------- Summary Builder -------------------
+// ------------------- Optimized Summary Builder -------------------
 const buildCompactProfileSummary = async (username) => {
-  const profile = await fetchGitHubProfile(username);
-  const repos = await fetchGitHubRepos(username);
+  const cacheKey = `summary:${username}`;
+  const cached = await getCachedData(cacheKey);
+  if (cached) return cached;
 
-  if (!profile) {
-    throw new Error("GitHub profile not found");
-  }
+  try {
+    // Fetch profile and repos in parallel
+    const [profile, repos] = await Promise.all([
+      fetchGitHubProfile(username),
+      fetchGitHubRepos(username)
+    ]);
 
-  const stars = repos.reduce((sum, r) => sum + (r.stargazers_count || 0), 0);
-  const forks = repos.reduce((sum, r) => sum + (r.forks_count || 0), 0);
+    if (!profile) {
+      throw new Error("GitHub profile not found");
+    }
 
-  const langsSet = [...new Set(repos.map((r) => r.language).filter(Boolean))];
-  const langs = langsSet.slice(0, 5).map(lang =>
-    lang === "JavaScript" ? "JS" :
-    lang === "Python" ? "Py" :
-    lang === "TypeScript" ? "TS" : lang
-  );
+    // Calculate basic stats
+    const stars = repos.reduce((sum, r) => sum + (r.stargazers_count || 0), 0);
+    const forks = repos.reduce((sum, r) => sum + (r.forks_count || 0), 0);
 
-  const recent = [...repos]
-    .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
-    .slice(0, 3)
-    .map((r) => r.name);
+    // Get top languages from repos (without API calls for basic summary)
+    const languageCount = {};
+    repos.forEach(repo => {
+      if (repo.language) {
+        languageCount[repo.language] = (languageCount[repo.language] || 0) + 1;
+      }
+    });
 
-  const lvl = stars > 200 ? "High" : stars > 50 ? "Mod" : "Low";
-
-  const r = await Promise.all(
-    repos.map(async (repo) => {
-      const lObj = await fetchRepoLanguages(username, repo.name);
-      const l = Object.keys(lObj).map(lang =>
+    const topLanguages = Object.entries(languageCount)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 5)
+      .map(([lang]) => 
         lang === "JavaScript" ? "JS" :
         lang === "Python" ? "Py" :
         lang === "TypeScript" ? "TS" : lang
       );
-      return { n: repo.name, l };
-    })
-  );
 
-  return {
-    u: username,
-    s: {
-      pr: profile?.public_repos || 0,
-      f: profile?.followers || 0,
-      stars,
-      forks,
-      langs,
-      lvl,
-      recent,
-    },
-    r
-  };
+    // Recent projects
+    const recent = repos
+      .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
+      .slice(0, 3)
+      .map(r => r.name);
+
+    const level = stars > 200 ? "High" : stars > 50 ? "Mod" : "Low";
+
+    // For detailed language analysis, fetch languages for top repos only
+    const topRepos = repos
+      .sort((a, b) => (b.stargazers_count || 0) - (a.stargazers_count || 0))
+      .slice(0, 10); // Only analyze top 10 repos for detailed languages
+
+    const repoLanguages = await fetchMultipleRepoLanguages(username, topRepos.map(r => r.name));
+
+    const detailedRepos = topRepos.map(repo => ({
+      n: repo.name,
+      l: Object.keys(repoLanguages[repo.name] || {}).map(lang =>
+        lang === "JavaScript" ? "JS" :
+        lang === "Python" ? "Py" :
+        lang === "TypeScript" ? "TS" : lang
+      ).slice(0, 3) // Top 3 languages per repo
+    }));
+
+    const summary = {
+      u: username,
+      s: {
+        pr: profile?.public_repos || 0,
+        f: profile?.followers || 0,
+        stars,
+        forks,
+        langs: topLanguages,
+        lvl: level,
+        recent,
+      },
+      r: detailedRepos
+    };
+
+    // Cache the complete summary
+    await setCachedData(cacheKey, summary, 90); // Cache for 1.5 hours
+
+    return summary;
+  } catch (error) {
+    console.error("Error building profile summary:", error);
+    throw error;
+  }
 };
 
 // ------------------- User Update Function -------------------
 const updateUserGitHubSummary = async (userId, githubUsername) => {
   await connectDB();
 
-  // Check if user exists
   const existingUser = await User.findOne({ userId });
   if (!existingUser) {
     throw new Error("User not found. Please make sure you're logged in.");
   }
 
-  // Generate the GitHub summary
   const summary = await buildCompactProfileSummary(githubUsername);
   if (!summary) {
     throw new Error("Failed to generate GitHub summary");
   }
 
-  // Update the existing user with the summary and GitHub username
   const updatedUser = await User.findOneAndUpdate(
     { userId },
     {
@@ -209,13 +412,21 @@ const updateUserGitHubSummary = async (userId, githubUsername) => {
 
 // ------------------- API Handler -------------------
 export async function GET(req) {
+  const startTime = Date.now();
+  
   try {
-    // Get the authenticated user from Clerk
+    // Rate limiting
+    const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+    if (!checkRateLimit(ip)) {
+      return NextResponse.json({ 
+        error: "Rate limit exceeded. Please try again later." 
+      }, { status: 429 });
+    }
+
+    // Auth check
     let authData;
-    
     try {
       authData = auth();
-      // Check if auth() returns a promise (newer versions)
       if (authData && typeof authData.then === 'function') {
         authData = await authData;
       }
@@ -224,11 +435,11 @@ export async function GET(req) {
     }
     
     const { userId } = authData || {};
-    
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized. Please log in." }, { status: 401 });
     }
 
+    // Parse parameters
     const { searchParams } = new URL(req.url);
     const githubUsername = searchParams.get("username");
     const saveToDb = searchParams.get("save") === "true";
@@ -239,34 +450,42 @@ export async function GET(req) {
       return NextResponse.json({ error: "GitHub username is required" }, { status: 400 });
     }
 
+    // Validate username format
+    if (!/^[a-zA-Z0-9]([a-zA-Z0-9-])*[a-zA-Z0-9]$|^[a-zA-Z0-9]$/.test(githubUsername)) {
+      return NextResponse.json({ error: "Invalid GitHub username format" }, { status: 400 });
+    }
+
     let result;
     let analysis = null;
     
     if (saveToDb) {
-      // Save to user's profile in DB
       const updatedUser = await updateUserGitHubSummary(userId, githubUsername);
       result = updatedUser.summary;
     } else {
-      // Just generate and return the summary without saving
       result = await buildCompactProfileSummary(githubUsername);
     }
 
-    // If analysis is requested and target role is provided
+    // Run analysis in parallel if requested
     if (analyze && targetRole && result) {
       analysis = await analyzeWithGemini(result, targetRole);
     }
 
+    const processingTime = Date.now() - startTime;
+    
     return NextResponse.json({ 
       success: true,
       result,
       analysis,
-      message: saveToDb ? "Summary saved to your profile" : "Summary generated"
+      message: saveToDb ? "Summary saved to your profile" : "Summary generated",
+      meta: {
+        processingTime: `${processingTime}ms`,
+        cached: processingTime < 1000 // Likely cached if very fast
+      }
     }, { status: 200 });
 
   } catch (err) {
     console.error("❌ Error in github-analysis API:", err);
     
-    // Handle specific error types
     if (err.message.includes("User not found")) {
       return NextResponse.json({ error: err.message }, { status: 404 });
     }
@@ -275,15 +494,33 @@ export async function GET(req) {
       return NextResponse.json({ error: "GitHub username not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    if (err.message.includes("rate limit")) {
+      return NextResponse.json({ 
+        error: "GitHub API rate limit reached. Please try again later." 
+      }, { status: 429 });
+    }
+
+    return NextResponse.json({ 
+      error: "Internal Server Error",
+      message: process.env.NODE_ENV === 'development' ? err.message : undefined
+    }, { status: 500 });
   }
 }
 
 // ------------------- POST Handler -------------------
 export async function POST(req) {
+  const startTime = Date.now();
+  
   try {
+    // Rate limiting
+    const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+    if (!checkRateLimit(ip)) {
+      return NextResponse.json({ 
+        error: "Rate limit exceeded. Please try again later." 
+      }, { status: 429 });
+    }
+
     let authData;
-    
     try {
       authData = auth();
       if (authData && typeof authData.then === 'function') {
@@ -294,17 +531,15 @@ export async function POST(req) {
     }
     
     const { userId } = authData || {};
-    
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized. Please log in." }, { status: 401 });
     }
 
     const body = await req.json();
-    const { targetRole, analyze } = body;
+    const { targetRole, analyze, forceRefresh } = body;
 
     await connectDB();
 
-    // Find user and regenerate summary using stored GitHub username
     const user = await User.findOne({ userId });
     if (!user || !user.githubUsername) {
       return NextResponse.json({ 
@@ -312,23 +547,50 @@ export async function POST(req) {
       }, { status: 404 });
     }
 
-    // Regenerate summary
+    // Clear cache if force refresh is requested
+    if (forceRefresh) {
+      const cacheKeys = [
+        `summary:${user.githubUsername}`,
+        `profile:${user.githubUsername}`,
+        `repos:${user.githubUsername}`
+      ];
+      
+      await Promise.all(cacheKeys.map(key => 
+        Cache.deleteOne({ key }).catch(err => console.error("Cache clear error:", err))
+      ));
+    }
+
     const updatedUser = await updateUserGitHubSummary(userId, user.githubUsername);
     
     let analysis = null;
     if (analyze && targetRole) {
       analysis = await analyzeWithGemini(updatedUser.summary, targetRole);
     }
+
+    const processingTime = Date.now() - startTime;
     
     return NextResponse.json({ 
       success: true,
       result: updatedUser.summary,
       analysis,
-      message: "GitHub summary regenerated successfully"
+      message: forceRefresh ? "GitHub summary force refreshed" : "GitHub summary regenerated",
+      meta: {
+        processingTime: `${processingTime}ms`
+      }
     }, { status: 200 });
 
   } catch (err) {
     console.error("❌ Error regenerating GitHub summary:", err);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    
+    if (err.message.includes("rate limit")) {
+      return NextResponse.json({ 
+        error: "GitHub API rate limit reached. Please try again later." 
+      }, { status: 429 });
+    }
+    
+    return NextResponse.json({ 
+      error: "Internal Server Error",
+      message: process.env.NODE_ENV === 'development' ? err.message : undefined
+    }, { status: 500 });
   }
 }

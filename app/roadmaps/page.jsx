@@ -19,7 +19,6 @@ import {
   Calendar,
 } from "lucide-react";
 import { careerRoadmaps } from "@/data/mockData";
-// Removed Zustand store import
 
 const CareerRoadmaps = () => {
   const router = useRouter();
@@ -30,11 +29,6 @@ const CareerRoadmaps = () => {
   const [animatingWeek, setAnimatingWeek] = useState(null);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // No need to load progress - we get it directly from mock scores
-
-  // Removed Zustand hydration logic
-
-  // Simple progress tracking without Zustand
   const [completedWeeks, setCompletedWeeks] = useState(new Set());
 
   // Load completed weeks from database - FAST single API call

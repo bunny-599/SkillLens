@@ -769,9 +769,18 @@ export const careerRoadmaps = [
           "Security Terminology",
         ],
         resources: [
-          "Cybrary Intro Course",
-          "Khan Academy",
-          "NIST Cybersecurity Framework",
+          {
+            name: "Cybrary Intro Course",
+            url: "https://www.cybrary.it/course/introduction-to-it-and-cybersecurity/",
+          },
+          {
+            name: "NIST Framework",
+            url: "https://www.nist.gov/cyberframework",
+          },
+          {
+            name: "SANS Cyber Aces",
+            url: "https://cyberaces.org/courses/security",
+          },
         ],
         milestone: "Create a threat model for a web app",
         completed: false,
@@ -782,9 +791,18 @@ export const careerRoadmaps = [
         description: "Understand how data moves across the internet",
         skills: ["OSI Model", "TCP/IP", "IP Addressing", "Ports & Protocols"],
         resources: [
-          "Cisco Networking Basics",
-          "Professor Messer",
-          "NetworkChuck YouTube",
+          {
+            name: "Cisco NetAcad",
+            url: "https://www.netacad.com/courses/networking/introduction-networks",
+          },
+          {
+            name: "Professor Messer",
+            url: "https://www.professormesser.com/network-plus/",
+          },
+          {
+            name: "NetworkChuck",
+            url: "https://www.youtube.com/c/NetworkChuck",
+          },
         ],
         milestone: "Map and document a home network layout",
         completed: false,
@@ -799,7 +817,17 @@ export const careerRoadmaps = [
           "File Systems",
           "User Roles",
         ],
-        resources: ["OverTheWire Wargames", "TryHackMe", "Linux Journey"],
+        resources: [
+          {
+            name: "OverTheWire",
+            url: "https://overthewire.org/wargames/bandit/",
+          },
+          {
+            name: "TryHackMe",
+            url: "https://tryhackme.com/room/linuxfundamentalspart1",
+          },
+          { name: "Linux Journey", url: "https://linuxjourney.com/" },
+        ],
         milestone: "Harden a Linux VM and enable basic firewall rules",
         completed: false,
       },
@@ -812,7 +840,14 @@ export const careerRoadmaps = [
           "Hashing Algorithms",
           "SSL/TLS",
         ],
-        resources: ["Crypto101.io", "Khan Academy", "SSL Labs Docs"],
+        resources: [
+          { name: "Crypto101", url: "https://www.crypto101.io/" },
+          {
+            name: "Khan Academy Crypto",
+            url: "https://www.khanacademy.org/computing/computer-science/cryptography",
+          },
+          { name: "SSL Labs", url: "https://www.ssllabs.com/ssltest/" },
+        ],
         milestone: "Implement a simple Caesar cipher and hash checker",
         completed: false,
       },
@@ -822,9 +857,15 @@ export const careerRoadmaps = [
         description: "Identify and mitigate web-based attacks",
         skills: ["XSS", "SQL Injection", "CSRF", "Authentication Flaws"],
         resources: [
-          "OWASP Top 10",
-          "PortSwigger Labs",
-          "HackTheBox Web Challenges",
+          {
+            name: "OWASP Top 10",
+            url: "https://owasp.org/www-project-top-ten/",
+          },
+          {
+            name: "PortSwigger Academy",
+            url: "https://portswigger.net/web-security",
+          },
+          { name: "HackTheBox", url: "https://academy.hackthebox.com/" },
         ],
         milestone: "Perform XSS and SQLi in a test lab",
         completed: false,
@@ -835,9 +876,12 @@ export const careerRoadmaps = [
         description: "Explore ethical hacking and vulnerability scanning",
         skills: ["Kali Linux", "Nmap", "Metasploit", "Burp Suite"],
         resources: [
-          "TryHackMe Pentesting Path",
-          "Hack The Box Academy",
-          "OffSec Blog",
+          {
+            name: "TryHackMe",
+            url: "https://tryhackme.com/path/outline/beginner",
+          },
+          { name: "HTB Academy", url: "https://academy.hackthebox.com/" },
+          { name: "Kali Training", url: "https://kali.training/" },
         ],
         milestone: "Scan and exploit a vulnerable VM in a safe lab",
         completed: false,
@@ -853,9 +897,12 @@ export const careerRoadmaps = [
           "Incident Response",
         ],
         resources: [
-          "Splunk Tutorials",
-          "Security Onion Docs",
-          "Blue Team Labs Online",
+          {
+            name: "Splunk Training",
+            url: "https://www.splunk.com/en_us/training/",
+          },
+          { name: "Security Onion", url: "https://docs.securityonion.net/" },
+          { name: "Blue Team Labs", url: "https://blueteamlabs.online/" },
         ],
         milestone: "Create alerts and dashboards in Splunk",
         completed: false,
@@ -871,9 +918,12 @@ export const careerRoadmaps = [
           "Chain of Custody",
         ],
         resources: [
-          "DFIR Training Labs",
-          "Autopsy Tool Docs",
-          "CERT Guidelines",
+          { name: "DFIR Training", url: "https://www.dfir.training/" },
+          { name: "Autopsy", url: "https://www.autopsy.com/support/training/" },
+          {
+            name: "SANS DFIR",
+            url: "https://www.sans.org/digital-forensics-incident-response/",
+          },
         ],
         milestone: "Document and report a simulated incident",
         completed: false,
@@ -889,9 +939,18 @@ export const careerRoadmaps = [
           "Encryption at Rest",
         ],
         resources: [
-          "AWS Security Essentials",
-          "Azure Defender Docs",
-          "Cloud Academy",
+          {
+            name: "AWS Security",
+            url: "https://aws.amazon.com/training/digital/aws-security-fundamentals/",
+          },
+          {
+            name: "Azure Security",
+            url: "https://docs.microsoft.com/en-us/learn/paths/azure-security-technologies/",
+          },
+          {
+            name: "Cloud Security Alliance",
+            url: "https://cloudsecurityalliance.org/education/",
+          },
         ],
         milestone: "Set up IAM roles and secure an S3 bucket",
         completed: false,
@@ -907,9 +966,12 @@ export const careerRoadmaps = [
           "Portfolio Projects",
         ],
         resources: [
-          "TryHackMe Final Rooms",
-          "GitHub Pages for Portfolio",
-          "Infosec Writeups",
+          { name: "TryHackMe", url: "https://tryhackme.com/" },
+          { name: "GitHub Pages", url: "https://pages.github.com/" },
+          {
+            name: "Cybersecurity Career Guide",
+            url: "https://www.cyberseek.org/pathway.html",
+          },
         ],
         milestone:
           "Complete a full penetration test report and publish a portfolio project",
@@ -935,9 +997,22 @@ export const careerRoadmaps = [
           "Emulator & Real Device Testing",
         ],
         resources: [
-          "Flutter Docs",
-          "Android Developers Guide",
-          "YouTube - CodeWithChris",
+          {
+            name: "Flutter Official Documentation",
+            url: "https://docs.flutter.dev/get-started/install"
+          },
+          {
+            name: "Android Developers Guide",
+            url: "https://developer.android.com/guide"
+          },
+          {
+            name: "CodeWithChris Flutter Setup",
+            url: "https://www.youtube.com/watch?v=1gDhl4leEzA"
+          },
+          {
+            name: "Flutter Installation Guide",
+            url: "https://flutter.dev/docs/get-started/install"
+          }
         ],
         milestone: "Set up Flutter and run Hello World app",
         completed: false,
@@ -953,9 +1028,22 @@ export const careerRoadmaps = [
           "Collections & Async",
         ],
         resources: [
-          "Dart.dev Tutorials",
-          "Flutter YouTube Playlist",
-          "freeCodeCamp Dart",
+          {
+            name: "Dart Language Tour",
+            url: "https://dart.dev/guides/language/language-tour"
+          },
+          {
+            name: "Dart Programming Tutorial",
+            url: "https://dart.dev/tutorials"
+          },
+          {
+            name: "freeCodeCamp Dart Course",
+            url: "https://www.youtube.com/watch?v=Ej_Pcr4uC2Q"
+          },
+          {
+            name: "Flutter Dart Basics",
+            url: "https://www.youtube.com/watch?v=5xlVP04905w"
+          }
         ],
         milestone: "Create a command-line app in Dart",
         completed: false,
@@ -972,9 +1060,22 @@ export const careerRoadmaps = [
           "Text, Image, Buttons",
         ],
         resources: [
-          "Flutter Widget Catalog",
-          "Reso Coder Tutorials",
-          "Flutter.dev UI Guide",
+          {
+            name: "Flutter Widget Catalog",
+            url: "https://docs.flutter.dev/development/ui/widgets"
+          },
+          {
+            name: "Reso Coder Flutter UI",
+            url: "https://www.youtube.com/c/ResoCoder"
+          },
+          {
+            name: "Flutter UI Guide",
+            url: "https://docs.flutter.dev/development/ui"
+          },
+          {
+            name: "Flutter Layout Cheat Sheet",
+            url: "https://medium.com/flutter-community/flutter-layout-cheat-sheet-5363348d037e"
+          }
         ],
         milestone: "Design a profile card UI",
         completed: false,
@@ -985,9 +1086,22 @@ export const careerRoadmaps = [
         description: "Add multiple screens and manage app routes",
         skills: ["Navigator", "Named Routes", "Route Arguments"],
         resources: [
-          "Flutter Routing Docs",
-          "Flutter.dev Cookbook",
-          "Fireship Flutter Routing",
+          {
+            name: "Flutter Navigation and Routing",
+            url: "https://docs.flutter.dev/development/ui/navigation"
+          },
+          {
+            name: "Flutter Cookbook - Navigation",
+            url: "https://docs.flutter.dev/cookbook/navigation"
+          },
+          {
+            name: "Fireship Flutter Routing",
+            url: "https://www.youtube.com/watch?v=nyvwx7o277U"
+          },
+          {
+            name: "GoRouter Package",
+            url: "https://pub.dev/packages/go_router"
+          }
         ],
         milestone: "Create a multi-screen quiz app",
         completed: false,
@@ -998,9 +1112,22 @@ export const careerRoadmaps = [
         description: "Handle UI state using various management techniques",
         skills: ["setState", "Provider", "Riverpod Basics", "State Lifecycle"],
         resources: [
-          "Flutter State Management Guide",
-          "Provider Docs",
-          "YouTube - Reso Coder",
+          {
+            name: "Flutter State Management Guide",
+            url: "https://docs.flutter.dev/development/data-and-backend/state-mgmt"
+          },
+          {
+            name: "Provider Package",
+            url: "https://pub.dev/packages/provider"
+          },
+          {
+            name: "Riverpod Documentation",
+            url: "https://riverpod.dev/"
+          },
+          {
+            name: "Reso Coder State Management",
+            url: "https://www.youtube.com/watch?v=d_m5csmrf7I"
+          }
         ],
         milestone: "Build a todo app using Provider",
         completed: false,
@@ -1011,9 +1138,22 @@ export const careerRoadmaps = [
         description: "Accept, validate, and submit user input via forms",
         skills: ["TextField", "Form Validation", "Controllers", "Snackbar"],
         resources: [
-          "Flutter Forms Docs",
-          "FilledStacks Tutorials",
-          "Official Cookbook",
+          {
+            name: "Flutter Forms Documentation",
+            url: "https://docs.flutter.dev/cookbook/forms"
+          },
+          {
+            name: "FilledStacks Form Tutorials",
+            url: "https://www.filledstacks.com/post/flutter-form-validation-tutorial/"
+          },
+          {
+            name: "Flutter Form Validation",
+            url: "https://docs.flutter.dev/cookbook/forms/validation"
+          },
+          {
+            name: "Form Builder Package",
+            url: "https://pub.dev/packages/flutter_form_builder"
+          }
         ],
         milestone: "Build a login/register UI with validation",
         completed: false,
@@ -1024,9 +1164,22 @@ export const careerRoadmaps = [
         description: "Fetch and send data over the internet",
         skills: ["HTTP Package", "FutureBuilder", "JSON Parsing", "REST APIs"],
         resources: [
-          "Flutter Networking Guide",
-          "Dio Docs",
-          "Postman API Practice",
+          {
+            name: "Flutter Networking Guide",
+            url: "https://docs.flutter.dev/cookbook/networking/fetch-data"
+          },
+          {
+            name: "HTTP Package",
+            url: "https://pub.dev/packages/http"
+          },
+          {
+            name: "Dio Package (Advanced HTTP)",
+            url: "https://pub.dev/packages/dio"
+          },
+          {
+            name: "JSONPlaceholder API",
+            url: "https://jsonplaceholder.typicode.com/"
+          }
         ],
         milestone: "Build a weather app using OpenWeatherMap API",
         completed: false,
@@ -1042,9 +1195,22 @@ export const careerRoadmaps = [
           "Firebase Setup",
         ],
         resources: [
-          "Firebase Docs",
-          "FlutterFire Plugins",
-          "Fireship.io Firebase",
+          {
+            name: "FlutterFire Documentation",
+            url: "https://firebase.flutter.dev/"
+          },
+          {
+            name: "Firebase Console",
+            url: "https://console.firebase.google.com/"
+          },
+          {
+            name: "Fireship Firebase Flutter",
+            url: "https://www.youtube.com/watch?v=sfA3NWDBPZ4"
+          },
+          {
+            name: "Firebase Auth Package",
+            url: "https://pub.dev/packages/firebase_auth"
+          }
         ],
         milestone: "Create a real-time chat app",
         completed: false,
@@ -1060,9 +1226,22 @@ export const careerRoadmaps = [
           "iOS App Store Basics",
         ],
         resources: [
-          "Flutter Deployment Docs",
-          "Play Console Help",
-          "App Store Submission Guide",
+          {
+            name: "Flutter Deployment Documentation",
+            url: "https://docs.flutter.dev/deployment"
+          },
+          {
+            name: "Google Play Console",
+            url: "https://play.google.com/console/"
+          },
+          {
+            name: "Apple App Store Connect",
+            url: "https://appstoreconnect.apple.com/"
+          },
+          {
+            name: "Flutter Build and Release",
+            url: "https://docs.flutter.dev/deployment/android"
+          }
         ],
         milestone: "Publish a test app to Google Play (internal track)",
         completed: false,
@@ -1079,9 +1258,22 @@ export const careerRoadmaps = [
           "API Integration",
         ],
         resources: [
-          "Your previous projects",
-          "Dribbble for Design Ideas",
-          "GitHub for Version Control",
+          {
+            name: "Flutter Samples",
+            url: "https://github.com/flutter/samples"
+          },
+          {
+            name: "Dribbble Mobile UI",
+            url: "https://dribbble.com/tags/mobile_ui"
+          },
+          {
+            name: "GitHub for Version Control",
+            url: "https://docs.github.com/en/get-started"
+          },
+          {
+            name: "Flutter Gallery App",
+            url: "https://github.com/flutter/gallery"
+          }
         ],
         milestone:
           "Build and deploy a full mobile app (e.g., Expense Tracker or Task Manager)",
@@ -1108,9 +1300,22 @@ export const careerRoadmaps = [
           "Cloud Advantages",
         ],
         resources: [
-          "AWS Cloud Practitioner Essentials",
-          "Microsoft Learn - Cloud Basics",
-          "Coursera Cloud 101",
+          {
+            name: "AWS Cloud Practitioner Essentials",
+            url: "https://aws.amazon.com/training/digital/aws-cloud-practitioner-essentials/"
+          },
+          {
+            name: "Microsoft Learn - Azure Fundamentals",
+            url: "https://docs.microsoft.com/en-us/learn/paths/az-900-describe-cloud-concepts/"
+          },
+          {
+            name: "Google Cloud Fundamentals",
+            url: "https://www.cloudskillsboost.google/course_templates/60"
+          },
+          {
+            name: "Coursera Cloud Computing Basics",
+            url: "https://www.coursera.org/learn/cloud-computing-basics"
+          }
         ],
         milestone: "Compare services between AWS, Azure, and GCP",
         completed: false,
@@ -1121,9 +1326,22 @@ export const careerRoadmaps = [
         description: "Work with core AWS services and the console",
         skills: ["EC2", "S3", "IAM", "AWS CLI"],
         resources: [
-          "AWS Free Tier",
-          "AWS Getting Started Docs",
-          "YouTube - freeCodeCamp AWS",
+          {
+            name: "AWS Free Tier",
+            url: "https://aws.amazon.com/free/"
+          },
+          {
+            name: "AWS Getting Started Documentation",
+            url: "https://docs.aws.amazon.com/gettingstarted/"
+          },
+          {
+            name: "freeCodeCamp AWS Course",
+            url: "https://www.youtube.com/watch?v=3hLmDS179YE"
+          },
+          {
+            name: "AWS CLI User Guide",
+            url: "https://docs.aws.amazon.com/cli/latest/userguide/"
+          }
         ],
         milestone: "Launch a web server using EC2 and store files in S3",
         completed: false,
@@ -1139,9 +1357,22 @@ export const careerRoadmaps = [
           "Package Managers",
         ],
         resources: [
-          "LinuxCommand.org",
-          "OverTheWire: Bandit",
-          "DigitalOcean Tutorials",
+          {
+            name: "LinuxCommand.org",
+            url: "https://linuxcommand.org/"
+          },
+          {
+            name: "OverTheWire Bandit",
+            url: "https://overthewire.org/wargames/bandit/"
+          },
+          {
+            name: "DigitalOcean Linux Tutorials",
+            url: "https://www.digitalocean.com/community/tutorials"
+          },
+          {
+            name: "Linux Journey",
+            url: "https://linuxjourney.com/"
+          }
         ],
         milestone: "SSH into an EC2 instance and install a web app",
         completed: false,
@@ -1152,9 +1383,22 @@ export const careerRoadmaps = [
         description: "Understand cloud networking and scalability",
         skills: ["VPC", "Subnets", "Load Balancers", "Security Groups"],
         resources: [
-          "AWS VPC Docs",
-          "Azure Networking Concepts",
-          "GCP Networking Guide",
+          {
+            name: "AWS VPC Documentation",
+            url: "https://docs.aws.amazon.com/vpc/"
+          },
+          {
+            name: "Azure Virtual Network",
+            url: "https://docs.microsoft.com/en-us/azure/virtual-network/"
+          },
+          {
+            name: "Google Cloud VPC Guide",
+            url: "https://cloud.google.com/vpc/docs"
+          },
+          {
+            name: "AWS Load Balancing",
+            url: "https://aws.amazon.com/elasticloadbalancing/"
+          }
         ],
         milestone: "Create a public VPC and configure a load balancer",
         completed: false,
@@ -1170,9 +1414,22 @@ export const careerRoadmaps = [
           "Backup & Snapshots",
         ],
         resources: [
-          "AWS RDS Docs",
-          "Cloud Academy DB Courses",
-          "DigitalOcean Managed DB Guide",
+          {
+            name: "AWS RDS Documentation",
+            url: "https://docs.aws.amazon.com/rds/"
+          },
+          {
+            name: "AWS S3 User Guide",
+            url: "https://docs.aws.amazon.com/s3/"
+          },
+          {
+            name: "Cloud Academy Database Courses",
+            url: "https://cloudacademy.com/library/amazon-web-services/catalog/databases/"
+          },
+          {
+            name: "DigitalOcean Managed Databases",
+            url: "https://www.digitalocean.com/products/managed-databases/"
+          }
         ],
         milestone: "Host a blog on EC2 with a cloud database backend",
         completed: false,
@@ -1188,9 +1445,22 @@ export const careerRoadmaps = [
           "Container Networking",
         ],
         resources: [
-          "Docker Docs",
-          "Play With Docker",
-          "YouTube - TechWorld with Nana",
+          {
+            name: "Docker Official Documentation",
+            url: "https://docs.docker.com/"
+          },
+          {
+            name: "Play With Docker",
+            url: "https://labs.play-with-docker.com/"
+          },
+          {
+            name: "TechWorld with Nana Docker",
+            url: "https://www.youtube.com/watch?v=3c-iBn73dDE"
+          },
+          {
+            name: "Docker Compose Documentation",
+            url: "https://docs.docker.com/compose/"
+          }
         ],
         milestone: "Containerize a Node.js or Python Flask app",
         completed: false,
@@ -1200,7 +1470,24 @@ export const careerRoadmaps = [
         title: "Orchestration with Kubernetes",
         description: "Manage containers at scale using Kubernetes",
         skills: ["Pods", "Deployments", "Services", "Helm"],
-        resources: ["Kubernetes Docs", "Katacoda K8s Scenarios", "Learnk8s.io"],
+        resources: [
+          {
+            name: "Kubernetes Official Documentation",
+            url: "https://kubernetes.io/docs/"
+          },
+          {
+            name: "Kubernetes Interactive Tutorials",
+            url: "https://kubernetes.io/docs/tutorials/"
+          },
+          {
+            name: "Learnk8s.io",
+            url: "https://learnk8s.io/"
+          },
+          {
+            name: "Helm Documentation",
+            url: "https://helm.sh/docs/"
+          }
+        ],
         milestone: "Deploy a multi-container app on Minikube or EKS",
         completed: false,
       },
@@ -1210,9 +1497,22 @@ export const careerRoadmaps = [
         description: "Automate build and deployment using CI/CD tools",
         skills: ["GitHub Actions", "Jenkins", "GitLab CI/CD", "YAML Workflows"],
         resources: [
-          "GitHub Actions Docs",
-          "Jenkins Tutorials",
-          "freeCodeCamp CI/CD Playlist",
+          {
+            name: "GitHub Actions Documentation",
+            url: "https://docs.github.com/en/actions"
+          },
+          {
+            name: "Jenkins Documentation",
+            url: "https://www.jenkins.io/doc/"
+          },
+          {
+            name: "GitLab CI/CD Documentation",
+            url: "https://docs.gitlab.com/ee/ci/"
+          },
+          {
+            name: "freeCodeCamp DevOps Course",
+            url: "https://www.youtube.com/watch?v=j5Zsa_eOXeY"
+          }
         ],
         milestone: "Build and deploy a Docker app using GitHub Actions",
         completed: false,
@@ -1223,9 +1523,22 @@ export const careerRoadmaps = [
         description: "Manage cloud resources using code",
         skills: ["Terraform Basics", "AWS CDK", "CloudFormation Templates"],
         resources: [
-          "Terraform Docs",
-          "HashiCorp Learn",
-          "YouTube - DevOps Toolkit",
+          {
+            name: "Terraform Documentation",
+            url: "https://www.terraform.io/docs"
+          },
+          {
+            name: "HashiCorp Learn Terraform",
+            url: "https://learn.hashicorp.com/terraform"
+          },
+          {
+            name: "AWS CloudFormation Documentation",
+            url: "https://docs.aws.amazon.com/cloudformation/"
+          },
+          {
+            name: "AWS CDK Documentation",
+            url: "https://docs.aws.amazon.com/cdk/"
+          }
         ],
         milestone: "Create infrastructure using Terraform on AWS",
         completed: false,
@@ -1235,7 +1548,24 @@ export const careerRoadmaps = [
         title: "Monitoring, Logging & Capstone Project",
         description: "Monitor cloud apps and complete a real-world deployment",
         skills: ["CloudWatch", "Grafana", "Prometheus", "ELK Stack"],
-        resources: ["AWS Monitoring Docs", "Grafana Labs", "Prometheus Docs"],
+        resources: [
+          {
+            name: "AWS CloudWatch Documentation",
+            url: "https://docs.aws.amazon.com/cloudwatch/"
+          },
+          {
+            name: "Grafana Documentation",
+            url: "https://grafana.com/docs/"
+          },
+          {
+            name: "Prometheus Documentation",
+            url: "https://prometheus.io/docs/"
+          },
+          {
+            name: "Elastic Stack Documentation",
+            url: "https://www.elastic.co/guide/"
+          }
+        ],
         milestone:
           "Deploy a containerized app with CI/CD, IaC, and monitoring dashboard",
         completed: false,
@@ -1255,7 +1585,24 @@ export const careerRoadmaps = [
         description:
           "Understand the basics of how games are made and what tools are used",
         skills: ["Game Genres", "Game Loop Concept", "Game Engines Overview"],
-        resources: ["GDC Talks", "GameDev.tv Blog", "Coursera Game Dev Intro"],
+        resources: [
+          {
+            name: "GDC Vault",
+            url: "https://www.gdcvault.com/"
+          },
+          {
+            name: "GameDev.tv Blog",
+            url: "https://www.gamedev.tv/blog"
+          },
+          {
+            name: "Coursera Game Design and Development",
+            url: "https://www.coursera.org/specializations/game-development"
+          },
+          {
+            name: "Extra Credits Game Design",
+            url: "https://www.youtube.com/extracredits"
+          }
+        ],
         milestone: "Explore Unity/Unreal interface and build a basic 2D scene",
         completed: false,
       },
@@ -1271,9 +1618,22 @@ export const careerRoadmaps = [
           "Classes & Methods",
         ],
         resources: [
-          "Microsoft C# Docs",
-          "Brackeys YouTube C# Series",
-          "Unity Learn C#",
+          {
+            name: "Microsoft C# Documentation",
+            url: "https://docs.microsoft.com/en-us/dotnet/csharp/"
+          },
+          {
+            name: "Brackeys C# Basics",
+            url: "https://www.youtube.com/watch?v=IFayQioG71A"
+          },
+          {
+            name: "Unity Learn C# Scripting",
+            url: "https://learn.unity.com/tutorial/introduction-to-c-sharp-scripting"
+          },
+          {
+            name: "C# Programming Yellow Book",
+            url: "https://www.robmiles.com/c-yellow-book/"
+          }
         ],
         milestone: "Build a basic console game like number guesser",
         completed: false,
@@ -1284,9 +1644,22 @@ export const careerRoadmaps = [
         description: "Learn to work with the Unity interface and game objects",
         skills: ["Scenes", "GameObjects", "Components", "Inspector"],
         resources: [
-          "Unity Learn Pathways",
-          "YouTube - Brackeys Unity Basics",
-          "Official Unity Docs",
+          {
+            name: "Unity Learn Pathways",
+            url: "https://learn.unity.com/"
+          },
+          {
+            name: "Brackeys Unity Beginner Tutorial",
+            url: "https://www.youtube.com/watch?v=j48LtUkZRjU"
+          },
+          {
+            name: "Unity Manual",
+            url: "https://docs.unity3d.com/Manual/"
+          },
+          {
+            name: "Unity Scripting Reference",
+            url: "https://docs.unity3d.com/ScriptReference/"
+          }
         ],
         milestone: "Create a 2D platformer scene with character and terrain",
         completed: false,
@@ -1302,9 +1675,22 @@ export const careerRoadmaps = [
           "Rigidbodies",
         ],
         resources: [
-          "Unity Input System",
-          "Code Monkey Tutorials",
-          "Brackeys - Player Movement",
+          {
+            name: "Unity Input System Documentation",
+            url: "https://docs.unity3d.com/Packages/com.unity.inputsystem@1.0/manual/"
+          },
+          {
+            name: "Code Monkey Unity Tutorials",
+            url: "https://www.youtube.com/c/CodeMonkeyUnity"
+          },
+          {
+            name: "Brackeys Player Movement",
+            url: "https://www.youtube.com/watch?v=4HpC--2iowE"
+          },
+          {
+            name: "Unity Physics Documentation",
+            url: "https://docs.unity3d.com/Manual/PhysicsSection.html"
+          }
         ],
         milestone: "Add jump and move features to your character",
         completed: false,
@@ -1315,9 +1701,22 @@ export const careerRoadmaps = [
         description: "Implement realistic behavior using physics engine",
         skills: ["Colliders", "Triggers", "Gravity", "Force Application"],
         resources: [
-          "Unity Physics Docs",
-          "Physics & Rigidbody Videos",
-          "Raycasting",
+          {
+            name: "Unity Physics Documentation",
+            url: "https://docs.unity3d.com/Manual/PhysicsSection.html"
+          },
+          {
+            name: "Unity Colliders Tutorial",
+            url: "https://learn.unity.com/tutorial/collision-detection-with-colliders"
+          },
+          {
+            name: "Raycasting in Unity",
+            url: "https://docs.unity3d.com/ScriptReference/Physics.Raycast.html"
+          },
+          {
+            name: "Brackeys 2D Physics",
+            url: "https://www.youtube.com/watch?v=whzomFgjT50"
+          }
         ],
         milestone: "Create obstacles and win/lose conditions using physics",
         completed: false,
@@ -1328,9 +1727,22 @@ export const careerRoadmaps = [
         description: "Build game interfaces and logic for score/health",
         skills: ["Canvas System", "Health Bar", "Score Counter", "Menus"],
         resources: [
-          "Unity UI Toolkit",
-          "YouTube UI Tutorials",
-          "GameDev.tv Courses",
+          {
+            name: "Unity UI Toolkit Documentation",
+            url: "https://docs.unity3d.com/Manual/UIElements.html"
+          },
+          {
+            name: "Unity UI System (Legacy)",
+            url: "https://docs.unity3d.com/Manual/UISystem.html"
+          },
+          {
+            name: "Brackeys Health System Tutorial",
+            url: "https://www.youtube.com/watch?v=BLfNP4Sc_iA"
+          },
+          {
+            name: "GameDev.tv Complete Unity Developer",
+            url: "https://www.gamedev.tv/p/complete-unity-developer"
+          }
         ],
         milestone: "Add score counter and health bar with game over screen",
         completed: false,
@@ -1346,9 +1758,22 @@ export const careerRoadmaps = [
           "Sound Effects",
         ],
         resources: [
-          "Mixamo for 3D Animations",
-          "OpenGameArt.org",
-          "Unity Audio Docs",
+          {
+            name: "Unity Animation System",
+            url: "https://docs.unity3d.com/Manual/AnimationSection.html"
+          },
+          {
+            name: "Mixamo for 3D Animations",
+            url: "https://www.mixamo.com/"
+          },
+          {
+            name: "OpenGameArt.org",
+            url: "https://opengameart.org/"
+          },
+          {
+            name: "Unity Audio Documentation",
+            url: "https://docs.unity3d.com/Manual/AudioFiles.html"
+          }
         ],
         milestone: "Animate player actions and add sound effects",
         completed: false,
@@ -1359,9 +1784,22 @@ export const careerRoadmaps = [
         description: "Design levels and introduce gameplay elements",
         skills: ["Tilemaps", "Object Pooling", "Power-ups", "AI Enemies"],
         resources: [
-          "Unity Tilemap Tutorials",
-          "Game Design Patterns Book",
-          "Sebastian Lague AI",
+          {
+            name: "Unity 2D Tilemap Documentation",
+            url: "https://docs.unity3d.com/Manual/class-Tilemap.html"
+          },
+          {
+            name: "Unity Object Pooling",
+            url: "https://learn.unity.com/tutorial/object-pooling"
+          },
+          {
+            name: "Game Programming Patterns",
+            url: "https://gameprogrammingpatterns.com/"
+          },
+          {
+            name: "Sebastian Lague AI Tutorial",
+            url: "https://www.youtube.com/watch?v=6BrZryMz-ac"
+          }
         ],
         milestone: "Design two playable levels with increasing difficulty",
         completed: false,
@@ -1377,9 +1815,22 @@ export const careerRoadmaps = [
           "Frame Rate Tuning",
         ],
         resources: [
-          "Unity Profiler Docs",
-          "Performance Tips - Unity Blog",
-          "Polishing Game UX",
+          {
+            name: "Unity Profiler Documentation",
+            url: "https://docs.unity3d.com/Manual/Profiler.html"
+          },
+          {
+            name: "Unity Performance Tips",
+            url: "https://unity.com/how-to/optimize-game-performance-mobile-devices"
+          },
+          {
+            name: "Unity Visual Effect Graph",
+            url: "https://unity.com/visual-effect-graph"
+          },
+          {
+            name: "Game Feel by Steve Swink",
+            url: "https://www.amazon.com/Game-Feel-Designers-Sensation-Purchase/dp/0123743281"
+          }
         ],
         milestone: "Make your game smooth and visually appealing",
         completed: false,
@@ -1394,9 +1845,22 @@ export const careerRoadmaps = [
           "Itch.io Upload",
         ],
         resources: [
-          "Unity Build & Export Docs",
-          "Google Play Console Guide",
-          "Itch.io Docs",
+          {
+            name: "Unity Build Settings Documentation",
+            url: "https://docs.unity3d.com/Manual/BuildSettings.html"
+          },
+          {
+            name: "Google Play Console Guide",
+            url: "https://support.google.com/googleplay/android-developer/"
+          },
+          {
+            name: "Itch.io Creator Documentation",
+            url: "https://itch.io/docs/creators/"
+          },
+          {
+            name: "Unity WebGL Publishing",
+            url: "https://docs.unity3d.com/Manual/webgl-building.html"
+          }
         ],
         milestone:
           "Publish your final game project to itch.io or Android device",
@@ -1406,8 +1870,7 @@ export const careerRoadmaps = [
   },
   {
     role: "BlockchainDeveloper",
-    description:
-      "Build decentralized applications and smart contracts using blockchain technology",
+    description: "Build decentralized applications and smart contracts using blockchain technology",
     duration: "20 weeks",
     difficulty: "Advanced",
     weeks: [
@@ -1415,74 +1878,111 @@ export const careerRoadmaps = [
         week: 1,
         title: "Blockchain Fundamentals",
         description: "Understand how blockchain works and why it matters",
-        skills: [
-          "Distributed Ledger",
-          "Consensus Mechanisms",
-          "Hashing",
-          "Blocks & Mining",
-        ],
+        skills: ["Distributed Ledger", "Consensus Mechanisms", "Hashing", "Blocks & Mining"],
         resources: [
-          "Bitcoin Whitepaper",
-          "Blockchain Revolution Book",
-          "Coursera Blockchain Basics",
+          {
+            name: "Bitcoin Whitepaper",
+            url: "https://bitcoin.org/bitcoin.pdf"
+          },
+          {
+            name: "Blockchain Basics Course - Coursera",
+            url: "https://www.coursera.org/learn/blockchain-basics"
+          },
+          {
+            name: "Blockchain Demo - Anders Brownworth",
+            url: "https://andersbrownworth.com/blockchain/"
+          }
         ],
         milestone: "Simulate a basic blockchain using Python or JavaScript",
-        completed: false,
+        completed: false
       },
       {
         week: 2,
         title: "Cryptography & Wallets",
         description: "Explore cryptography and wallet generation principles",
-        skills: [
-          "Public/Private Key",
-          "Digital Signatures",
-          "Hash Functions",
-          "Wallet Types",
+        skills: ["Public/Private Key", "Digital Signatures", "Hash Functions", "Wallet Types"],
+        resources: [
+          {
+            name: "Khan Academy Cryptography",
+            url: "https://www.khanacademy.org/computing/computer-science/cryptography"
+          },
+          {
+            name: "Cryptography Course - Coursera Stanford",
+            url: "https://www.coursera.org/learn/crypto"
+          },
+          {
+            name: "Practical Cryptography for Developers",
+            url: "https://cryptobook.nakov.com/"
+          }
         ],
-        resources: ["Khan Academy Cryptography", "CryptoZombies", "ChainShot"],
         milestone: "Generate wallet keys and sign a transaction",
-        completed: false,
+        completed: false
       },
       {
         week: 3,
         title: "Ethereum & Smart Contracts",
         description: "Dive into Ethereum and write your first smart contract",
-        skills: [
-          "Ethereum Virtual Machine (EVM)",
-          "Gas & Transactions",
-          "Remix IDE",
+        skills: ["Ethereum Virtual Machine (EVM)", "Gas & Transactions", "Remix IDE"],
+        resources: [
+          {
+            name: "Ethereum.org Developer Resources",
+            url: "https://ethereum.org/en/developers/"
+          },
+          {
+            name: "Remix IDE Documentation",
+            url: "https://remix-ide.readthedocs.io/en/latest/"
+          },
+          {
+            name: "Ethereum Whitepaper",
+            url: "https://ethereum.org/en/whitepaper/"
+          }
         ],
-        resources: ["Ethereum.org", "Remix IDE Docs", "Dapp University"],
         milestone: "Deploy a Hello World contract on Remix",
-        completed: false,
+        completed: false
       },
       {
         week: 4,
         title: "Solidity Programming Language",
         description: "Master the language used to write smart contracts",
-        skills: [
-          "Data Types",
-          "Functions",
-          "Mappings",
-          "Modifiers",
-          "Inheritance",
-        ],
+        skills: ["Data Types", "Functions", "Mappings", "Modifiers", "Inheritance"],
         resources: [
-          "Solidity Docs",
-          "CryptoZombies.io",
-          "Smart Contract Best Practices",
+          {
+            name: "Solidity Documentation",
+            url: "https://docs.soliditylang.org/en/latest/"
+          },
+          {
+            name: "CryptoZombies - Learn Solidity",
+            url: "https://cryptozombies.io/"
+          },
+          {
+            name: "Solidity by Example",
+            url: "https://solidity-by-example.org/"
+          }
         ],
         milestone: "Build a simple voting contract",
-        completed: false,
+        completed: false
       },
       {
         week: 5,
         title: "Smart Contract Deployment",
         description: "Deploy contracts to testnets and work with real networks",
         skills: ["Truffle/Hardhat", "Ganache", "Metamask", "Testnet Faucets"],
-        resources: ["Hardhat Docs", "Truffle Suite", "Alchemy Quickstart"],
+        resources: [
+          {
+            name: "Hardhat Documentation",
+            url: "https://hardhat.org/docs"
+          },
+          {
+            name: "Truffle Suite Documentation",
+            url: "https://trufflesuite.com/docs/"
+          },
+          {
+            name: "Alchemy Ethereum Development",
+            url: "https://docs.alchemy.com/docs"
+          }
+        ],
         milestone: "Deploy a contract on Goerli or Sepolia testnet",
-        completed: false,
+        completed: false
       },
       {
         week: 6,
@@ -1490,210 +1990,338 @@ export const careerRoadmaps = [
         description: "Build frontend DApps that interact with blockchain",
         skills: ["Web3.js", "Ether.js", "Contract ABI", "Metamask Integration"],
         resources: [
-          "Web3.js Docs",
-          "Dapp University Frontend Guide",
-          "Buildspace",
+          {
+            name: "Web3.js Documentation",
+            url: "https://web3js.readthedocs.io/en/v1.8.0/"
+          },
+          {
+            name: "Ethers.js Documentation",
+            url: "https://docs.ethers.io/v5/"
+          },
+          {
+            name: "MetaMask Developer Documentation",
+            url: "https://docs.metamask.io/"
+          }
         ],
         milestone: "Create a Web3 login and token balance viewer",
-        completed: false,
+        completed: false
       },
       {
         week: 7,
         title: "Tokens & Standards (ERC-20, ERC-721)",
         description: "Create your own tokens and NFTs using Solidity",
         skills: ["ERC-20 Tokens", "NFTs (ERC-721)", "OpenZeppelin Libraries"],
-        resources: ["OpenZeppelin Docs", "NFT School", "Alchemy NFT Tutorials"],
+        resources: [
+          {
+            name: "OpenZeppelin Documentation",
+            url: "https://docs.openzeppelin.com/"
+          },
+          {
+            name: "EIP-20: Token Standard",
+            url: "https://eips.ethereum.org/EIPS/eip-20"
+          },
+          {
+            name: "EIP-721: Non-Fungible Token Standard",
+            url: "https://eips.ethereum.org/EIPS/eip-721"
+          }
+        ],
         milestone: "Deploy a custom ERC-20 token and NFT",
-        completed: false,
+        completed: false
       },
       {
         week: 8,
         title: "DeFi & Smart Contract Security",
-        description:
-          "Explore DeFi protocols and secure smart contract development",
+        description: "Explore DeFi protocols and secure smart contract development",
         skills: ["Flash Loans", "Oracles", "Reentrancy Attacks", "Audit Tools"],
         resources: [
-          "Ethernaut Challenges",
-          "OpenZeppelin Security",
-          "DefiLlama",
+          {
+            name: "Ethernaut - Smart Contract Security",
+            url: "https://ethernaut.openzeppelin.com/"
+          },
+          {
+            name: "ConsenSys Smart Contract Best Practices",
+            url: "https://consensys.github.io/smart-contract-best-practices/"
+          },
+          {
+            name: "DeFiLlama - DeFi Analytics",
+            url: "https://defillama.com/"
+          }
         ],
         milestone: "Patch a reentrancy bug in a test contract",
-        completed: false,
+        completed: false
       },
       {
         week: 9,
         title: "Decentralized Storage & Identity",
         description: "Implement Web3 storage and decentralized authentication",
         skills: ["IPFS", "Filecoin", "ENS", "SSI (Self-Sovereign Identity)"],
-        resources: ["IPFS.io", "Textile Docs", "Ethereum Name Service Docs"],
+        resources: [
+          {
+            name: "IPFS Documentation",
+            url: "https://docs.ipfs.io/"
+          },
+          {
+            name: "Ethereum Name Service Documentation",
+            url: "https://docs.ens.domains/"
+          },
+          {
+            name: "Filecoin Documentation",
+            url: "https://docs.filecoin.io/"
+          }
+        ],
         milestone: "Build a DApp to upload and retrieve files from IPFS",
-        completed: false,
+        completed: false
       },
       {
         week: 10,
         title: "Final Capstone DApp",
-        description:
-          "Combine all skills to build and deploy a full-stack blockchain app",
+        description: "Combine all skills to build and deploy a full-stack blockchain app",
         skills: ["Frontend + Smart Contracts + Web3 Integration + Hosting"],
         resources: [
-          "Fleek.co for Hosting",
-          "Hardhat Full DApp Guide",
-          "Buildspace Projects",
+          {
+            name: "Fleek - Web3 Hosting",
+            url: "https://fleek.co/"
+          },
+          {
+            name: "Buildspace - Web3 Projects",
+            url: "https://buildspace.so/"
+          },
+          {
+            name: "Full Stack DApp Tutorial",
+            url: "https://ethereum.org/en/developers/tutorials/"
+          }
         ],
-        milestone:
-          "Deploy a full DApp (e.g., crowdfunding, NFT minting, DAO voting) to testnet or mainnet",
-        completed: false,
-      },
-    ],
+        milestone: "Deploy a full DApp (e.g., crowdfunding, NFT minting, DAO voting) to testnet or mainnet",
+        completed: false
+      }
+    ]
   },
   {
     role: "UI/UXDesigner",
-    description:
-      "Design intuitive and visually appealing user experiences for web and mobile apps",
+    description: "Design intuitive and visually appealing user experiences for web and mobile apps",
     duration: "20 weeks",
     difficulty: "Intermediate",
     weeks: [
       {
         week: 1,
         title: "Introduction to UI/UX Design",
-        description: "Understand what UI/UX is and why it’s important",
-        skills: [
-          "UI vs UX",
-          "Design Process",
-          "Design Thinking",
-          "User-Centered Design",
-        ],
+        description: "Understand what UI/UX is and why it's important",
+        skills: ["UI vs UX", "Design Process", "Design Thinking", "User-Centered Design"],
         resources: [
-          "NNGroup.com",
-          "Interaction Design Foundation",
-          "YouTube - Jesse Showalter",
+          {
+            name: "Nielsen Norman Group",
+            url: "https://www.nngroup.com/articles/"
+          },
+          {
+            name: "Interaction Design Foundation",
+            url: "https://www.interaction-design.org/"
+          },
+          {
+            name: "Google Design - Material Design",
+            url: "https://material.io/design"
+          }
         ],
         milestone: "Define and document the UI/UX process in your own words",
-        completed: false,
+        completed: false
       },
       {
         week: 2,
         title: "UX Research & User Personas",
         description: "Research user behavior and build user personas",
         skills: ["User Interviews", "Surveys", "Empathy Maps", "Personas"],
-        resources: ["UX Planet", "Miro Templates", "NNGroup User Research"],
+        resources: [
+          {
+            name: "UX Research Methods - Nielsen Norman Group",
+            url: "https://www.nngroup.com/articles/which-ux-research-methods/"
+          },
+          {
+            name: "User Persona Templates - Miro",
+            url: "https://miro.com/templates/persona/"
+          },
+          {
+            name: "UX Planet - User Research",
+            url: "https://uxplanet.org/tagged/user-research"
+          }
+        ],
         milestone: "Create 2 detailed user personas for a fictional product",
-        completed: false,
+        completed: false
       },
       {
         week: 3,
         title: "Information Architecture & User Flows",
         description: "Plan the structure and flow of an app or website",
         skills: ["Sitemaps", "User Flows", "Card Sorting", "Task Flows"],
-        resources: ["UXBooth.com", "Figma Flow Tools", "Lucidchart"],
-        milestone:
-          "Create a sitemap and user flow diagram for a login-based app",
-        completed: false,
+        resources: [
+          {
+            name: "Information Architecture - UXBooth",
+            url: "https://www.uxbooth.com/articles/complete-beginners-guide-to-information-architecture/"
+          },
+          {
+            name: "User Flow Templates - Figma",
+            url: "https://www.figma.com/templates/user-flows/"
+          },
+          {
+            name: "Card Sorting Guide - Usability.gov",
+            url: "https://www.usability.gov/how-to-and-tools/methods/card-sorting.html"
+          }
+        ],
+        milestone: "Create a sitemap and user flow diagram for a login-based app",
+        completed: false
       },
       {
         week: 4,
         title: "Wireframing & Low-Fidelity Prototypes",
         description: "Sketch and structure interface layout ideas",
-        skills: [
-          "Lo-fi Wireframes",
-          "Sketching",
-          "Wireframing Tools",
-          "UX Heuristics",
+        skills: ["Lo-fi Wireframes", "Sketching", "Wireframing Tools", "UX Heuristics"],
+        resources: [
+          {
+            name: "Wireframing Guide - Balsamiq",
+            url: "https://balsamiq.com/learn/articles/what-are-wireframes/"
+          },
+          {
+            name: "Figma Wireframing Kit",
+            url: "https://www.figma.com/community/file/809275435084021733"
+          },
+          {
+            name: "UX Heuristics - Nielsen Norman Group",
+            url: "https://www.nngroup.com/articles/ten-usability-heuristics/"
+          }
         ],
-        resources: ["Balsamiq", "Figma Wireframes", "UXPin"],
         milestone: "Build a wireframe for a landing page and signup flow",
-        completed: false,
+        completed: false
       },
       {
         week: 5,
         title: "UI Design Principles",
         description: "Learn key design principles for interfaces",
-        skills: [
-          "Color Theory",
-          "Typography",
-          "Spacing & Layout",
-          "Visual Hierarchy",
-        ],
+        skills: ["Color Theory", "Typography", "Spacing & Layout", "Visual Hierarchy"],
         resources: [
-          "Refactoring UI",
-          "Canva Design School",
-          "Google Material Design",
+          {
+            name: "Refactoring UI - Design Tips",
+            url: "https://refactoringui.com/"
+          },
+          {
+            name: "Canva Design School",
+            url: "https://www.canva.com/designschool/"
+          },
+          {
+            name: "Adobe Color Theory",
+            url: "https://color.adobe.com/create/color-wheel"
+          }
         ],
         milestone: "Design a mobile login screen using design principles",
-        completed: false,
+        completed: false
       },
       {
         week: 6,
         title: "Figma for UI Design",
         description: "Master a key industry tool for UI design and prototyping",
-        skills: [
-          "Auto Layout",
-          "Components",
-          "Design Systems",
-          "Interactive Prototypes",
-        ],
+        skills: ["Auto Layout", "Components", "Design Systems", "Interactive Prototypes"],
         resources: [
-          "Figma Learn Page",
-          "YouTube - Figma Crash Course",
-          "Design+Code",
+          {
+            name: "Figma Academy",
+            url: "https://www.figma.com/academy/"
+          },
+          {
+            name: "Figma Design System Tutorial",
+            url: "https://help.figma.com/hc/en-us/articles/360038662654-Guide-to-design-systems-in-Figma"
+          },
+          {
+            name: "Figma Community Resources",
+            url: "https://www.figma.com/community"
+          }
         ],
         milestone: "Create a reusable design system in Figma",
-        completed: false,
+        completed: false
       },
       {
         week: 7,
         title: "High-Fidelity Prototypes",
-        description:
-          "Build detailed, clickable prototypes to simulate real apps",
-        skills: [
-          "Screen Linking",
-          "Microinteractions",
-          "Transitions",
-          "Animations",
+        description: "Build detailed, clickable prototypes to simulate real apps",
+        skills: ["Screen Linking", "Microinteractions", "Transitions", "Animations"],
+        resources: [
+          {
+            name: "Figma Prototyping Documentation",
+            url: "https://help.figma.com/hc/en-us/articles/360040314193-Guide-to-prototyping-in-Figma"
+          },
+          {
+            name: "Microinteractions Guide - UX Planet",
+            url: "https://uxplanet.org/microinteractions-the-secret-to-great-app-design-4cfe70fbaccf"
+          },
+          {
+            name: "Framer Motion Documentation",
+            url: "https://www.framer.com/motion/"
+          }
         ],
-        resources: ["Figma Prototyping Docs", "Adobe XD Tutorials", "Framer"],
         milestone: "Build a high-fidelity prototype of an e-commerce app",
-        completed: false,
+        completed: false
       },
       {
         week: 8,
         title: "Usability Testing & Feedback",
         description: "Test your design with users and improve it",
-        skills: [
-          "A/B Testing",
-          "Usability Sessions",
-          "Feedback Forms",
-          "Observation",
+        skills: ["A/B Testing", "Usability Sessions", "Feedback Forms", "Observation"],
+        resources: [
+          {
+            name: "Usability Testing Guide - Usability.gov",
+            url: "https://www.usability.gov/how-to-and-tools/methods/usability-testing.html"
+          },
+          {
+            name: "Maze - User Testing Platform",
+            url: "https://maze.co/guides/"
+          },
+          {
+            name: "A/B Testing Guide - Optimizely",
+            url: "https://www.optimizely.com/optimization-glossary/ab-testing/"
+          }
         ],
-        resources: ["Maze.co", "Lookback.io", "Usability.gov"],
-        milestone:
-          "Conduct a usability test on your prototype and revise based on feedback",
-        completed: false,
+        milestone: "Conduct a usability test on your prototype and revise based on feedback",
+        completed: false
       },
       {
         week: 9,
         title: "UX Writing & Accessibility",
         description: "Improve product clarity and usability for all users",
-        skills: [
-          "Microcopy",
-          "Error Messaging",
-          "WCAG Guidelines",
-          "Alt Text & ARIA",
+        skills: ["Microcopy", "Error Messaging", "WCAG Guidelines", "Alt Text & ARIA"],
+        resources: [
+          {
+            name: "UX Writing Hub",
+            url: "https://uxwritinghub.com/"
+          },
+          {
+            name: "WCAG Guidelines - W3C",
+            url: "https://www.w3.org/WAI/WCAG21/quickref/"
+          },
+          {
+            name: "Google UX Writing Guide",
+            url: "https://developers.google.com/style/tone"
+          }
         ],
-        resources: ["UX Writing Hub", "W3 Accessibility", "Google UX Writing"],
         milestone: "Write microcopy and improve accessibility for a login form",
-        completed: false,
+        completed: false
       },
       {
         week: 10,
         title: "Capstone Design Project",
         description: "Apply all your skills in a final end-to-end project",
         skills: ["Research + Wireframes + UI + Prototype + Testing"],
-        resources: ["Dribbble", "Behance", "Figma Community Files"],
-        milestone:
-          "Design a full app (e.g., Recipe App, Finance Tracker) and upload to Behance/Portfolio",
-        completed: false,
-      },
-    ],
-  },
+        resources: [
+          {
+            name: "Dribbble Design Inspiration",
+            url: "https://dribbble.com/"
+          },
+          {
+            name: "Behance Portfolio Examples",
+            url: "https://www.behance.net/"
+          },
+          {
+            name: "Design Portfolio Guide - Adobe",
+            url: "https://xd.adobe.com/ideas/career-tips/how-to-build-design-portfolio/"
+          }
+        ],
+        milestone: "Design a full app (e.g., Recipe App, Finance Tracker) and upload to Behance/Portfolio",
+        completed: false
+      }
+    ]
+  }
 ];
