@@ -14,6 +14,7 @@ const userSchema = new mongoose.Schema({
     of: mongoose.Schema.Types.Mixed,
     default: new Map()
   },
+  isVoted: { type: Boolean, default: false },
   
   updatedAt: { type: Date, default: Date.now }
 });

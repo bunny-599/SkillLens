@@ -585,8 +585,29 @@ const CareerRoadmaps = () => {
                   })}
                 </div>
               </div>
+            
             </div>
+            <button
+              onClick={() => router.push('/newones')}
+              className="
+              w-full       
+              py-3 px-6               
+              bg-transparent        
+              text-neutral-100         
+              border border-neutral-700
+              rounded-lg
+              shadow-md
+              transition-all duration-200 ease-out
+              hover:bg-neutral-800 hover:shadow-lg hover:-translate-y-0.5
+              active:scale-[0.98] active:bg-neutral-950
+              focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 focus:ring-offset-neutral-900
+            "
+            >
+              Suggest New Courses Here.........!
+            </button>
           </div>
+          {/* voting system */}
+
         </div>
       </div>
       {showCompletion && <FireworksPopup />}
