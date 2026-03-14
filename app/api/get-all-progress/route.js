@@ -5,7 +5,17 @@ import User from "@/models/UserModel";
 
 export async function GET(request) {
   try {
-    const { userId } = await auth();
+    let authData;
+    try {
+      authData = auth();
+      if (authData && typeof authData.then === 'function') {
+        authData = await authData;
+      }
+    } catch (error) {
+      authData = await auth();
+    }
+    
+    const { userId } = authData || {};
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

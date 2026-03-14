@@ -9,7 +9,15 @@ export async function GET(req) {
     let userId = searchParams.get("userId");
 
     if (!userId) {
-      const authData = await auth();
+      let authData;
+      try {
+        authData = auth();
+        if (authData && typeof authData.then === 'function') {
+          authData = await authData;
+        }
+      } catch (error) {
+        authData = await auth();
+      }
       userId = authData?.userId;
     }
     

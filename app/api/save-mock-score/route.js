@@ -5,7 +5,17 @@ import User from "@/models/UserModel";
 
 export async function POST(request) {
   try {
-    const { userId } = await auth();
+    let authData;
+    try {
+      authData = auth();
+      if (authData && typeof authData.then === 'function') {
+        authData = await authData;
+      }
+    } catch (error) {
+      authData = await auth();
+    }
+    
+    const { userId } = authData || {};
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -19,10 +29,8 @@ export async function POST(request) {
 
     // Find or create user
     let user = await User.findOne({ userId });
-    console.log(`👤 Found user: ${user ? 'YES' : 'NO'}, userId: ${userId}`);
     if (!user) {
       user = new User({ userId });
-      console.log(`🆕 Created new user for ${userId}`);
     }
 
     // Initialize roadmapProgress as Map if it doesn't exist
@@ -35,36 +43,22 @@ export async function POST(request) {
         
     // Get existing roadmap data or create new
     let roadmapData = user.roadmapProgress.get(roadmap) || { weeks: {} };
-    console.log(`📊 Existing roadmap data:`, JSON.stringify(roadmapData, null, 2));
         
     // Ensure weeks object exists
     if (!roadmapData.weeks) {
       roadmapData.weeks = {};
     }
 
-    // IMPORTANT: Preserve existing week data by copying it
-    const existingWeeks = { ...roadmapData.weeks };
-
     // Update ONLY the specific week (preserve other weeks)
-    existingWeeks[weekIndex] = {
+    roadmapData.weeks[weekIndex] = {
       mockScore: mockScore,
       date: new Date().toISOString().split('T')[0],
       completed: mockScore >= 90,
       completedAt: mockScore >= 90 ? new Date() : null
     };
 
-    // Create the updated roadmap data
-    const updatedRoadmapData = {
-      ...roadmapData,
-      weeks: existingWeeks
-    };
-
-    console.log(`📝 Updated roadmap data:`, JSON.stringify(updatedRoadmapData, null, 2));
-
     // Save back to Map
-    user.roadmapProgress.set(roadmap, updatedRoadmapData);
-        
-    // CRITICAL: Tell Mongoose that the Map has been modified
+    user.roadmapProgress.set(roadmap, roadmapData);
     user.markModified('roadmapProgress');
     user.updatedAt = new Date();
 

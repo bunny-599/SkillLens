@@ -42,6 +42,9 @@ function checkRateLimit(ip, limit = 100, window = 3600000) {
 }
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
+if (!GITHUB_TOKEN) {
+  throw new Error("GITHUB_TOKEN is not defined in environment variables");
+}
 const BASE_URL = "https://api.github.com";
 
 const githubHeaders = {
@@ -353,17 +356,7 @@ export async function GET(req) {
       }, { status: 429 });
     }
 
-    let authData;
-    try {
-      authData = auth();
-      if (authData && typeof authData.then === 'function') {
-        authData = await authData;
-      }
-    } catch (error) {
-      authData = await auth();
-    }
-    
-    const { userId } = authData || {};
+    const { userId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized. Please log in." }, { status: 401 });
     }
