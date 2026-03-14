@@ -16,7 +16,7 @@ import Vapi from "@vapi-ai/web";
 import { useUser } from "@clerk/nextjs";
 
 export default function VideoInterview() {
-  const { user } = useUser(); // Get user from Clerk
+  const { user } = useUser();
   const [started, setStarted] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -36,34 +36,23 @@ export default function VideoInterview() {
   const [userInterviewData, setUserInterviewData] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Initialize Vapi with proper error handling
   const vapi = React.useMemo(() => {
     try {
       const apiKey = process.env.NEXT_PUBLIC_VAPI_API_KEY;
-      if (!apiKey) {
-        console.error("VAPI API key is missing");
-        return null;
-      }
+      if (!apiKey) return null;
       return new Vapi(apiKey);
     } catch (error) {
-      console.error("Failed to initialize Vapi:", error);
       return null;
     }
   }, []);
 
-  // Fetch user interview data
   const fetchUserData = async () => {
     try {
       setLoading(true);
-      
-      // Get target role from localStorage
-      const targetRole = localStorage.getItem('targetRole') || 'developer';
-      
-      // Get userId from Clerk
+      const targetRole = localStorage.getItem('target_role') || 'Web Developer';
       const userId = user?.id;
       
       if (!userId) {
-        console.error('User not authenticated with Clerk');
         return {
           githubUsername: user?.username || 'developer',
           targetRole,
@@ -78,9 +67,8 @@ export default function VideoInterview() {
       const response = await fetch(`/api/interview-data?userId=${userId}`);
       
       if (!response.ok) {
-        console.log('Failed to fetch user data from API, using fallback');
         return {
-          githubUsername: user?.username || 'developer',
+          githubUsername: user?.username || user?.firstName || 'developer',
           targetRole,
           totalWeeksCompleted: 0,
           summary: {
@@ -91,16 +79,16 @@ export default function VideoInterview() {
       }
       
       const userData = await response.json();
-      
-      // Calculate total weeks completed - only count completed weeks
       let totalWeeks = 0;
       if (userData.roadmapProgress) {
-        Object.keys(userData.roadmapProgress).forEach(role => {
-          if (userData.roadmapProgress[role].weeks) {
-            const weeks = Object.keys(userData.roadmapProgress[role].weeks);
-            // Only count completed weeks
-            weeks.forEach(weekNum => {
-              const week = userData.roadmapProgress[role].weeks[weekNum];
+        const progress = userData.roadmapProgress instanceof Map 
+          ? Object.fromEntries(userData.roadmapProgress) 
+          : userData.roadmapProgress;
+
+        Object.keys(progress).forEach(role => {
+          const roleData = progress[role];
+          if (roleData && typeof roleData === 'object') {
+            Object.values(roleData).forEach(week => {
               if (week && week.completed) {
                 totalWeeks += 1;
               }
@@ -111,16 +99,15 @@ export default function VideoInterview() {
 
       return {
         ...userData,
+        githubUsername: userData.githubUsername || user?.username || user?.firstName || 'developer',
         targetRole,
         totalWeeksCompleted: totalWeeks
       };
 
     } catch (error) {
-      console.error('Error fetching user data:', error);
-      // Return fallback data so interview can still work
       return {
         githubUsername: user?.username || 'developer',
-        targetRole: localStorage.getItem('targetRole') || 'developer',
+        targetRole: localStorage.getItem('target_role') || 'developer',
         totalWeeksCompleted: 0,
         summary: {
           s: { langs: ['JavaScript'], lvl: 'Beginner' },
@@ -132,10 +119,8 @@ export default function VideoInterview() {
     }
   };
 
-  // Generate dynamic assistant options based on user data
   const getAssistantOptions = (userData) => {
     if (!userData) {
-      // Fallback to default options
       return {
         name: "AI Recruiter",
         firstMessage: "Hello! I'm your AI interviewer today. Let's begin with your technical interview. Are you ready to start?",
@@ -145,12 +130,12 @@ export default function VideoInterview() {
           language: "en-US",
         },
         voice: {
-          provider: "playht",
-          voiceId: "jennifer",
+          provider: "vapi",
+          voiceId: "Neha",
         },
         model: {
           provider: "openai",
-          model: "gpt-4",
+          model: "gpt-3.5-turbo",
           messages: [
             {
               role: "system",
@@ -200,12 +185,12 @@ Start by asking about their coding journey and recent work.`;
         language: "en-US",
       },
       voice: {
-        provider: "playht",
-        voiceId: "jennifer",
+        provider: "11labs",
+        voiceId: "21m00Tcm4TlvDq8ikWAM",
       },
       model: {
         provider: "openai",
-        model: "gpt-4",
+        model: "gpt-3.5-turbo",
         messages: [
           {
             role: "system",
@@ -219,33 +204,25 @@ Start by asking about their coding journey and recent work.`;
   useEffect(() => {
     if (!vapi || !started) return;
 
-    // Add error handler first
     const handleError = (error) => {
-      console.error("Vapi error:", error);
     };
 
     vapi.on("error", handleError);
 
     try {
-      // Enhanced speech event handlers
       vapi.on("speech-start", () => {
-        console.log("AI started speaking");
         setIsAiSpeaking(true);
         setUserSubtitle("");
       });
 
       vapi.on("speech-end", () => {
-        console.log("AI stopped speaking");
         setIsAiSpeaking(false);
         setTimeout(() => {
           setAiSubtitle("");
         }, 3000);
       });
 
-      // Enhanced message handling for better captions
       vapi.on("message", (message) => {
-        console.log("Vapi message:", message);
-        
         if (message.type === "transcript") {
           const transcript = message.transcript || "";
           
@@ -284,21 +261,15 @@ Start by asking about their coding journey and recent work.`;
             }
           }
         }
-
-        if (message.type === "function-call") {
-          console.log("Function call:", message);
-        }
       });
 
       vapi.on("call-start", () => {
-        console.log("Call started");
         setIsRecording(true);
         setConversationHistory([]);
         setInterviewProgress(0);
       });
 
       vapi.on("call-end", () => {
-        console.log("Call ended");
         setIsRecording(false);
         setStarted(false);
         setAiSubtitle("");
@@ -311,26 +282,19 @@ Start by asking about their coding journey and recent work.`;
         setInterviewProgress(0);
       });
 
-      vapi.on("volume-level", (volume) => {
-        console.log("Volume level:", volume);
-      });
-
     } catch (error) {
-      console.error("Error setting up Vapi listeners:", error);
     }
 
     return () => {
       try {
         vapi.removeAllListeners();
       } catch (error) {
-        console.error("Error removing Vapi listeners:", error);
       }
     };
   }, [started, vapi]);
 
   const handleStart = async () => {
     if (!vapi) {
-      console.error("Vapi not initialized properly");
       alert("Vapi is not properly initialized. Please check your API key and try again.");
       return;
     }
@@ -343,18 +307,11 @@ Start by asking about their coding journey and recent work.`;
     try {
       setStarted(true);
       setConversationHistory([]);
-      
-      // Fetch user data and create dynamic assistant options
       const userData = await fetchUserData();
       setUserInterviewData(userData);
-      
       const assistantOptions = getAssistantOptions(userData);
-      
-      // Start Vapi with dynamic options
       vapi.start(assistantOptions);
-      
     } catch (error) {
-      console.error("Error starting Vapi:", error);
       setStarted(false);
       alert("Failed to start the interview. Please try again.");
     }
@@ -362,14 +319,9 @@ Start by asking about their coding journey and recent work.`;
 
   const handleEndInterview = () => {
     if (!vapi) return;
-    
     try {
       vapi.stop();
-    } catch (error) {
-      console.error("Error stopping Vapi:", error);
-    }
-    
-    // Reset all states
+    } catch (error) {}
     setStarted(false);
     setIsRecording(false);
     setAiSubtitle("");
@@ -385,32 +337,25 @@ Start by asking about their coding journey and recent work.`;
 
   const toggleMute = () => {
     if (!vapi) return;
-    
     try {
       setIsMuted(!isMuted);
       vapi.setMuted(!isMuted);
-    } catch (error) {
-      console.error("Error toggling mute:", error);
-    }
+    } catch (error) {}
   };
 
   const handleCodeSubmit = () => {
     if (codeInput.trim()) {
-      console.log("Code submitted:", codeInput);
-      
       setConversationHistory(prev => [...prev, {
         role: "user",
         message: `[CODE SUBMITTED] ${codeInput}`,
         timestamp: new Date().toLocaleTimeString(),
         isCode: true
       }]);
-      
       setCodeInput("");
       setShowCodeEditor(false);
     }
   };
 
-  // Show loading or sign in prompt if user is not authenticated
   if (!user) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white flex items-center justify-center">
@@ -460,10 +405,9 @@ Start by asking about their coding journey and recent work.`;
               )}
             </div>
             
-            {/* API Key Status Check */}
             {!process.env.NEXT_PUBLIC_VAPI_API_KEY && (
               <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-3 text-red-400 text-sm">
-                ⚠️ VAPI API key not found. Please add NEXT_PUBLIC_VAPI_API_KEY to your environment variables.
+                ⚠️ VAPI API key not found.
               </div>
             )}
             
@@ -504,7 +448,6 @@ Start by asking about their coding journey and recent work.`;
       ) : (
         <div className="min-h-screen p-4">
           <div className="max-w-7xl mx-auto space-y-6">
-            {/* Enhanced Header with Progress */}
             <div className="bg-gray-900/90 backdrop-blur-xl border border-gray-700/50 rounded-xl p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
@@ -536,7 +479,6 @@ Start by asking about their coding journey and recent work.`;
                 </div>
               </div>
               
-              {/* Progress Bar */}
               <div className="mt-3 w-full bg-gray-800 rounded-full h-2">
                 <div 
                   className="bg-gradient-to-r from-blue-500 to-purple-500 h-2 rounded-full transition-all duration-500"
@@ -545,9 +487,7 @@ Start by asking about their coding journey and recent work.`;
               </div>
             </div>
 
-            {/* Video Section with Enhanced Captions */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* User Video */}
               <div className="bg-gray-900/90 backdrop-blur-xl border border-gray-700/50 rounded-xl overflow-hidden">
                 <div className="bg-gray-800/50 px-4 py-2 flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -594,15 +534,6 @@ Start by asking about their coding journey and recent work.`;
                         <User className="w-8 h-8 text-blue-400" />
                       </div>
                       <div>Your Video Stream</div>
-                      {isUserSpeaking && (
-                        <div className="mt-2 flex justify-center">
-                          <div className="flex gap-1">
-                            <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
-                            <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
-                            <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
-                          </div>
-                        </div>
-                      )}
                     </div>
                   ) : (
                     <div className="text-gray-500 text-center">
@@ -611,7 +542,6 @@ Start by asking about their coding journey and recent work.`;
                     </div>
                   )}
 
-                  {/* Enhanced User Subtitles */}
                   {showCaptions && (userSubtitle || lastUserCaption) && (
                     <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 max-w-[90%]">
                       <div className="bg-black/90 backdrop-blur-sm rounded-lg px-4 py-2 border border-blue-400/40 shadow-2xl">
@@ -627,7 +557,6 @@ Start by asking about their coding journey and recent work.`;
                 </div>
               </div>
 
-              {/* AI Recruiter Video */}
               <div className="bg-gray-900/90 backdrop-blur-xl border border-gray-700/50 rounded-xl overflow-hidden">
                 <div className="bg-gray-800/50 px-4 py-2 flex items-center gap-2">
                   <Bot className="w-4 h-4 text-purple-400" />
@@ -642,12 +571,6 @@ Start by asking about their coding journey and recent work.`;
                       <span className="text-xs text-purple-400 font-medium">Speaking</span>
                     </div>
                   )}
-                  {!isAiSpeaking && isRecording && (
-                    <div className="ml-auto flex items-center gap-1">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      <span className="text-xs text-green-400">Listening</span>
-                    </div>
-                  )}
                 </div>
                 <div className="aspect-video bg-gradient-to-br from-purple-900/20 to-blue-900/20 flex items-center justify-center relative">
                   <div className="text-center space-y-2">
@@ -659,18 +582,8 @@ Start by asking about their coding journey and recent work.`;
                     <div className="text-gray-300 text-sm">
                       {isRecording ? "AI Interviewer Active" : "Connecting..."}
                     </div>
-                    {isAiSpeaking && (
-                      <div className="flex justify-center mt-2">
-                        <div className="flex gap-1">
-                          <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
-                          <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
-                          <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
-                        </div>
-                      </div>
-                    )}
                   </div>
 
-                  {/* Enhanced AI Subtitles */}
                   {showCaptions && (aiSubtitle || lastAiCaption) && (
                     <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 max-w-[90%]">
                       <div className="bg-black/90 backdrop-blur-sm rounded-lg px-4 py-2 border border-purple-400/40 shadow-2xl">
@@ -687,7 +600,6 @@ Start by asking about their coding journey and recent work.`;
               </div>
             </div>
 
-            {/* Code Editor Section */}
             <div className="bg-gray-900/90 backdrop-blur-xl border border-gray-700/50 rounded-xl overflow-hidden">
               <div className="bg-gradient-to-r from-gray-800/50 to-gray-700/50 px-6 py-4 border-b border-gray-600/30">
                 <div className="flex items-center justify-between">
@@ -724,54 +636,16 @@ Start by asking about their coding journey and recent work.`;
                       </div>
                       <span className="ml-2">solution.js</span>
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-gray-500">
-                      <span>JavaScript</span>
-                      <span>•</span>
-                      <span>Python</span>
-                      <span>•</span>
-                      <span>TypeScript</span>
-                    </div>
                   </div>
                   <div className="relative">
                     <textarea
                       value={codeInput}
                       onChange={(e) => setCodeInput(e.target.value)}
-                      placeholder="// Write your solution here...
-// The AI interviewer will analyze your code
-
-function solutionFunction() {
-  // Your implementation here
-  
-}
-
-// Test cases
-console.log(solutionFunction());"
+                      placeholder="// Write your solution here..."
                       className="w-full h-80 bg-gray-800/70 border border-gray-600/50 rounded-lg p-4 pl-12 text-white placeholder-gray-500 font-mono text-sm leading-relaxed focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500/50 resize-none transition-all"
-                      style={{
-                        lineHeight: "1.6",
-                        tabSize: "2",
-                      }}
                     />
-                    <div className="absolute left-2 top-4 text-xs text-gray-600 font-mono leading-relaxed pointer-events-none select-none">
-                      {Array.from({ length: 20 }, (_, i) => (
-                        <div key={i} className="h-[22.4px] flex items-center">
-                          {i + 1}
-                        </div>
-                      ))}
-                    </div>
                   </div>
                   <div className="flex items-center justify-between pt-4 border-t border-gray-700/50">
-                    <div className="flex items-center gap-4">
-                      <div className="text-sm text-gray-400">
-                        Lines: {codeInput.split("\n").length} | Characters: {codeInput.length}
-                      </div>
-                      {codeInput.trim() && (
-                        <div className="flex items-center gap-1 text-xs text-green-400">
-                          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                          <span>Ready to submit</span>
-                        </div>
-                      )}
-                    </div>
                     <div className="flex items-center gap-3">
                       <button
                         onClick={() => setCodeInput("")}
@@ -793,7 +667,6 @@ console.log(solutionFunction());"
               )}
             </div>
 
-            {/* Controls */}
             <div className="flex justify-center">
               <button
                 onClick={handleEndInterview}
@@ -807,21 +680,9 @@ console.log(solutionFunction());"
         </div>
       )}
 
-      {/* Enhanced Bottom Captions - User Speaking */}
       {started && showCaptions && (userSubtitle || (isUserSpeaking && lastUserCaption)) && (
         <div className="fixed left-0 right-0 bottom-20 w-full flex justify-center pointer-events-none z-50">
           <div className="bg-black/90 backdrop-blur-sm text-white px-6 py-3 rounded-lg text-lg max-w-4xl text-center shadow-2xl border-l-4 border-blue-400">
-            <div className="flex items-center justify-center gap-2 mb-1">
-              <User className="w-4 h-4 text-blue-400" />
-              <span className="text-blue-300 font-semibold text-sm">{user.username || 'You'}</span>
-              {isUserSpeaking && (
-                <div className="flex gap-1 ml-2">
-                  <div className="w-1 h-1 bg-blue-400 rounded-full animate-bounce"></div>
-                  <div className="w-1 h-1 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
-                  <div className="w-1 h-1 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
-                </div>
-              )}
-            </div>
             <div className="text-white leading-relaxed shadow-text">
               {userSubtitle || lastUserCaption}
             </div>
@@ -829,59 +690,12 @@ console.log(solutionFunction());"
         </div>
       )}
 
-      {/* Enhanced Bottom Captions - AI Speaking */}
       {started && showCaptions && (aiSubtitle || (isAiSpeaking && lastAiCaption)) && (
         <div className="fixed left-0 right-0 bottom-2 w-full flex justify-center pointer-events-none z-50">
           <div className="bg-black/90 backdrop-blur-sm text-white px-6 py-3 rounded-lg text-lg max-w-4xl text-center shadow-2xl border-l-4 border-purple-400">
-            <div className="flex items-center justify-center gap-2 mb-1">
-              <Bot className="w-4 h-4 text-purple-400" />
-              <span className="text-purple-300 font-semibold text-sm">AI Interviewer</span>
-              {isAiSpeaking && (
-                <div className="flex gap-1 ml-2">
-                  <div className="w-1 h-1 bg-purple-400 rounded-full animate-bounce"></div>
-                  <div className="w-1 h-1 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: "0.1s" }}></div>
-                  <div className="w-1 h-1 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></div>
-                </div>
-              )}
-            </div>
             <div className="text-white leading-relaxed shadow-text">
               {aiSubtitle || lastAiCaption}
             </div>
-          </div>
-        </div>
-      )}
-
-      {/* Conversation History Panel (Optional - can be toggled) */}
-      {started && conversationHistory.length > 0 && (
-        <div className="fixed right-4 top-1/2 transform -translate-y-1/2 w-80 max-h-96 bg-black/80 backdrop-blur-sm rounded-lg border border-gray-700 overflow-hidden z-40">
-          <div className="bg-gray-800/50 px-4 py-2 border-b border-gray-600">
-            <h3 className="text-sm font-semibold text-white">Interview Log</h3>
-          </div>
-          <div className="overflow-y-auto max-h-80 p-4 space-y-3">
-            {conversationHistory.slice(-6).map((item, index) => (
-              <div key={index} className={`text-xs p-2 rounded ${
-                item.role === 'assistant' 
-                  ? 'bg-purple-900/30 border-l-2 border-purple-400' 
-                  : item.isCode 
-                    ? 'bg-blue-900/30 border-l-2 border-blue-400'
-                    : 'bg-gray-800/50 border-l-2 border-gray-400'
-              }`}>
-                <div className="text-gray-400 mb-1 flex items-center gap-1">
-                  {item.role === 'assistant' ? <Bot className="w-3 h-3" /> : <User className="w-3 h-3" />}
-                  <span>{item.role === 'assistant' ? 'AI' : user.username || 'You'}</span>
-                  <span className="ml-auto">{item.timestamp}</span>
-                </div>
-                <div className="text-white text-xs">
-                  {item.isCode ? (
-                    <code className="bg-gray-800 p-1 rounded text-green-400">
-                      {item.message.replace('[CODE SUBMITTED] ', '')}
-                    </code>
-                  ) : (
-                    item.message
-                  )}
-                </div>
-              </div>
-            ))}
           </div>
         </div>
       )}

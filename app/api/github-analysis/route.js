@@ -1,24 +1,9 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import mongoose from "mongoose";
+import dbConnect from "@/lib/db";
+import User from "@/models/UserModel";
 
-// ------------------- User Schema -------------------
-const userSchema = new mongoose.Schema({
-  userId: { type: String, required: true, unique: true },
-  githubUsername: { type: String },
-  summary: { type: Object, default: {} },
-  interviewScores: { type: [Number], default: [] },
-  roadmapProgress: {
-    type: Map,
-    of: mongoose.Schema.Types.Mixed,
-    default: new Map()
-  },
-  updatedAt: { type: Date, default: Date.now }
-});
-
-const User = mongoose.models.User || mongoose.model("User", userSchema);
-
-// ------------------- Cache Schema -------------------
 const cacheSchema = new mongoose.Schema({
   key: { type: String, required: true, unique: true },
   data: { type: Object, required: true },
@@ -27,35 +12,13 @@ const cacheSchema = new mongoose.Schema({
 
 const Cache = mongoose.models.Cache || mongoose.model("Cache", cacheSchema);
 
-// ------------------- DB Connect -------------------
-let isConnected = false;
-
 async function connectDB() {
-  if (isConnected) return;
-  
-  if (mongoose.connection.readyState === 1) {
-    isConnected = true;
-    return;
-  }
-  
-  try {
-    await mongoose.connect(process.env.MONGO_URI, {
-      maxPoolSize: 10,
-      serverSelectionTimeoutMS: 5000,
-      socketTimeoutMS: 45000,
-    });
-    isConnected = true;
-    console.log("✅ MongoDB connected");
-  } catch (error) {
-    console.error("❌ MongoDB connection error:", error);
-    throw error;
-  }
+  await dbConnect();
 }
 
-// ------------------- Rate Limiting -------------------
 const rateLimits = new Map();
 
-function checkRateLimit(ip, limit = 100, window = 3600000) { // 100 requests per hour
+function checkRateLimit(ip, limit = 100, window = 3600000) {
   const now = Date.now();
   const key = `${ip}:${Math.floor(now / window)}`;
   
@@ -66,7 +29,6 @@ function checkRateLimit(ip, limit = 100, window = 3600000) { // 100 requests per
   
   rateLimits.set(key, current + 1);
   
-  // Clean old entries
   if (rateLimits.size > 1000) {
     const cutoff = Math.floor(now / window) - 1;
     for (const [k, _] of rateLimits) {
@@ -79,7 +41,6 @@ function checkRateLimit(ip, limit = 100, window = 3600000) { // 100 requests per
   return true;
 }
 
-// ------------------- GitHub API Utils -------------------
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const BASE_URL = "https://api.github.com";
 
@@ -89,14 +50,12 @@ const githubHeaders = {
   'User-Agent': 'GitHub-Profile-Analyzer'
 };
 
-// Cache utilities
 async function getCachedData(key) {
   try {
     await connectDB();
     const cached = await Cache.findOne({ key, expiresAt: { $gt: new Date() } });
     return cached?.data || null;
   } catch (error) {
-    console.error("Cache read error:", error);
     return null;
   }
 }
@@ -110,25 +69,22 @@ async function setCachedData(key, data, ttlMinutes = 60) {
       { data, expiresAt },
       { upsert: true }
     );
-  } catch (error) {
-    console.error("Cache write error:", error);
-  }
+  } catch (error) {}
 }
 
-// Optimized GitHub API calls with retry logic
 async function fetchWithRetry(url, retries = 3) {
   for (let i = 0; i < retries; i++) {
     try {
       const response = await fetch(url, { 
         headers: githubHeaders,
-        timeout: 10000 
+        next: { revalidate: 3600 }
       });
       
       if (response.status === 403) {
         const resetTime = response.headers.get('x-ratelimit-reset');
         if (resetTime) {
           const waitTime = (parseInt(resetTime) * 1000) - Date.now();
-          if (waitTime > 0 && waitTime < 60000) { // Wait max 1 minute
+          if (waitTime > 0 && waitTime < 60000) {
             await new Promise(resolve => setTimeout(resolve, Math.min(waitTime, 60000)));
             continue;
           }
@@ -155,10 +111,9 @@ const fetchGitHubProfile = async (username) => {
 
   try {
     const profile = await fetchWithRetry(`${BASE_URL}/users/${username}`);
-    await setCachedData(cacheKey, profile, 120); // Cache for 2 hours
+    await setCachedData(cacheKey, profile, 120); 
     return profile;
   } catch (error) {
-    console.error("Error fetching profile:", error);
     return null;
   }
 };
@@ -169,22 +124,18 @@ const fetchGitHubRepos = async (username) => {
   if (cached) return cached;
 
   try {
-    // Fetch first 100 repos, sorted by updated
     const repos = await fetchWithRetry(`${BASE_URL}/users/${username}/repos?per_page=100&sort=updated`);
-    await setCachedData(cacheKey, repos, 60); // Cache for 1 hour
+    await setCachedData(cacheKey, repos, 60); 
     return repos;
   } catch (error) {
-    console.error("Error fetching repos:", error);
     return [];
   }
 };
 
-// Optimized: Fetch multiple repo languages in parallel with batching
 const fetchMultipleRepoLanguages = async (username, repoNames) => {
-  const BATCH_SIZE = 10; // Process in batches to avoid overwhelming the API
+  const BATCH_SIZE = 10;
   const results = {};
   
-  // Check cache first
   const cachedResults = await Promise.all(
     repoNames.map(async (repoName) => {
       const cacheKey = `langs:${username}:${repoName}`;
@@ -202,21 +153,16 @@ const fetchMultipleRepoLanguages = async (username, repoNames) => {
     }
   });
   
-  // Fetch missing data in batches
   for (let i = 0; i < toFetch.length; i += BATCH_SIZE) {
     const batch = toFetch.slice(i, i + BATCH_SIZE);
     
     const batchPromises = batch.map(async (repoName) => {
       try {
         const languages = await fetchWithRetry(`${BASE_URL}/repos/${username}/${repoName}/languages`);
-        
-        // Cache the result
         const cacheKey = `langs:${username}:${repoName}`;
-        await setCachedData(cacheKey, languages, 180); // Cache for 3 hours
-        
+        await setCachedData(cacheKey, languages, 180);
         return { repoName, languages };
       } catch (error) {
-        console.error(`Error fetching languages for ${repoName}:`, error);
         return { repoName, languages: {} };
       }
     });
@@ -226,7 +172,6 @@ const fetchMultipleRepoLanguages = async (username, repoNames) => {
       results[repoName] = languages;
     });
     
-    // Small delay between batches to be nice to the API
     if (i + BATCH_SIZE < toFetch.length) {
       await new Promise(resolve => setTimeout(resolve, 100));
     }
@@ -235,7 +180,6 @@ const fetchMultipleRepoLanguages = async (username, repoNames) => {
   return results;
 };
 
-// ------------------- Gemini Analysis (with caching) -------------------
 const analyzeWithGemini = async (githubSummary, targetRole) => {
   const cacheKey = `analysis:${githubSummary.u}:${targetRole}`;
   const cached = await getCachedData(cacheKey);
@@ -283,26 +227,23 @@ Be direct and honest. Keep it short.`;
     const jsonMatch = analysisText.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       const analysis = JSON.parse(jsonMatch[0]);
-      await setCachedData(cacheKey, analysis, 30); // Cache for 30 minutes
+      await setCachedData(cacheKey, analysis, 30);
       return analysis;
     } else {
       throw new Error("Invalid response from Gemini");
     }
     
   } catch (error) {
-    console.error("Error calling Gemini API:", error);
     throw new Error("Failed to analyze profile");
   }
 };
 
-// ------------------- Optimized Summary Builder -------------------
 const buildCompactProfileSummary = async (username) => {
   const cacheKey = `summary:${username}`;
   const cached = await getCachedData(cacheKey);
   if (cached) return cached;
 
   try {
-    // Fetch profile and repos in parallel
     const [profile, repos] = await Promise.all([
       fetchGitHubProfile(username),
       fetchGitHubRepos(username)
@@ -312,11 +253,9 @@ const buildCompactProfileSummary = async (username) => {
       throw new Error("GitHub profile not found");
     }
 
-    // Calculate basic stats
     const stars = repos.reduce((sum, r) => sum + (r.stargazers_count || 0), 0);
     const forks = repos.reduce((sum, r) => sum + (r.forks_count || 0), 0);
 
-    // Get top languages from repos (without API calls for basic summary)
     const languageCount = {};
     repos.forEach(repo => {
       if (repo.language) {
@@ -333,7 +272,6 @@ const buildCompactProfileSummary = async (username) => {
         lang === "TypeScript" ? "TS" : lang
       );
 
-    // Recent projects
     const recent = repos
       .sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
       .slice(0, 3)
@@ -341,10 +279,9 @@ const buildCompactProfileSummary = async (username) => {
 
     const level = stars > 200 ? "High" : stars > 50 ? "Mod" : "Low";
 
-    // For detailed language analysis, fetch languages for top repos only
     const topRepos = repos
       .sort((a, b) => (b.stargazers_count || 0) - (a.stargazers_count || 0))
-      .slice(0, 10); // Only analyze top 10 repos for detailed languages
+      .slice(0, 10);
 
     const repoLanguages = await fetchMultipleRepoLanguages(username, topRepos.map(r => r.name));
 
@@ -354,7 +291,7 @@ const buildCompactProfileSummary = async (username) => {
         lang === "JavaScript" ? "JS" :
         lang === "Python" ? "Py" :
         lang === "TypeScript" ? "TS" : lang
-      ).slice(0, 3) // Top 3 languages per repo
+      ).slice(0, 3)
     }));
 
     const summary = {
@@ -371,17 +308,14 @@ const buildCompactProfileSummary = async (username) => {
       r: detailedRepos
     };
 
-    // Cache the complete summary
-    await setCachedData(cacheKey, summary, 90); // Cache for 1.5 hours
+    await setCachedData(cacheKey, summary, 90);
 
     return summary;
   } catch (error) {
-    console.error("Error building profile summary:", error);
     throw error;
   }
 };
 
-// ------------------- User Update Function -------------------
 const updateUserGitHubSummary = async (userId, githubUsername) => {
   await connectDB();
 
@@ -410,12 +344,8 @@ const updateUserGitHubSummary = async (userId, githubUsername) => {
   return updatedUser;
 };
 
-// ------------------- API Handler -------------------
 export async function GET(req) {
-  const startTime = Date.now();
-  
   try {
-    // Rate limiting
     const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
     if (!checkRateLimit(ip)) {
       return NextResponse.json({ 
@@ -423,7 +353,6 @@ export async function GET(req) {
       }, { status: 429 });
     }
 
-    // Auth check
     let authData;
     try {
       authData = auth();
@@ -439,7 +368,6 @@ export async function GET(req) {
       return NextResponse.json({ error: "Unauthorized. Please log in." }, { status: 401 });
     }
 
-    // Parse parameters
     const { searchParams } = new URL(req.url);
     const githubUsername = searchParams.get("username");
     const saveToDb = searchParams.get("save") === "true";
@@ -450,7 +378,6 @@ export async function GET(req) {
       return NextResponse.json({ error: "GitHub username is required" }, { status: 400 });
     }
 
-    // Validate username format
     if (!/^[a-zA-Z0-9]([a-zA-Z0-9-])*[a-zA-Z0-9]$|^[a-zA-Z0-9]$/.test(githubUsername)) {
       return NextResponse.json({ error: "Invalid GitHub username format" }, { status: 400 });
     }
@@ -465,27 +392,18 @@ export async function GET(req) {
       result = await buildCompactProfileSummary(githubUsername);
     }
 
-    // Run analysis in parallel if requested
     if (analyze && targetRole && result) {
       analysis = await analyzeWithGemini(result, targetRole);
     }
 
-    const processingTime = Date.now() - startTime;
-    
     return NextResponse.json({ 
       success: true,
       result,
       analysis,
-      message: saveToDb ? "Summary saved to your profile" : "Summary generated",
-      meta: {
-        processingTime: `${processingTime}ms`,
-        cached: processingTime < 1000 // Likely cached if very fast
-      }
+      message: saveToDb ? "Summary saved to your profile" : "Summary generated"
     }, { status: 200 });
 
   } catch (err) {
-    console.error("❌ Error in github-analysis API:", err);
-    
     if (err.message.includes("User not found")) {
       return NextResponse.json({ error: err.message }, { status: 404 });
     }
@@ -501,18 +419,13 @@ export async function GET(req) {
     }
 
     return NextResponse.json({ 
-      error: "Internal Server Error",
-      message: process.env.NODE_ENV === 'development' ? err.message : undefined
+      error: "Internal Server Error"
     }, { status: 500 });
   }
 }
 
-// ------------------- POST Handler -------------------
 export async function POST(req) {
-  const startTime = Date.now();
-  
   try {
-    // Rate limiting
     const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
     if (!checkRateLimit(ip)) {
       return NextResponse.json({ 
@@ -547,7 +460,6 @@ export async function POST(req) {
       }, { status: 404 });
     }
 
-    // Clear cache if force refresh is requested
     if (forceRefresh) {
       const cacheKeys = [
         `summary:${user.githubUsername}`,
@@ -556,7 +468,7 @@ export async function POST(req) {
       ];
       
       await Promise.all(cacheKeys.map(key => 
-        Cache.deleteOne({ key }).catch(err => console.error("Cache clear error:", err))
+        Cache.deleteOne({ key }).catch(() => {})
       ));
     }
 
@@ -567,21 +479,14 @@ export async function POST(req) {
       analysis = await analyzeWithGemini(updatedUser.summary, targetRole);
     }
 
-    const processingTime = Date.now() - startTime;
-    
     return NextResponse.json({ 
       success: true,
       result: updatedUser.summary,
       analysis,
-      message: forceRefresh ? "GitHub summary force refreshed" : "GitHub summary regenerated",
-      meta: {
-        processingTime: `${processingTime}ms`
-      }
+      message: forceRefresh ? "GitHub summary force refreshed" : "GitHub summary regenerated"
     }, { status: 200 });
 
   } catch (err) {
-    console.error("❌ Error regenerating GitHub summary:", err);
-    
     if (err.message.includes("rate limit")) {
       return NextResponse.json({ 
         error: "GitHub API rate limit reached. Please try again later." 
@@ -589,8 +494,7 @@ export async function POST(req) {
     }
     
     return NextResponse.json({ 
-      error: "Internal Server Error",
-      message: process.env.NODE_ENV === 'development' ? err.message : undefined
+      error: "Internal Server Error"
     }, { status: 500 });
   }
 }

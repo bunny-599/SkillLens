@@ -1,12 +1,17 @@
-// app/api/interview-data/route.js (or route.ts)
 import { auth } from '@clerk/nextjs/server';
 import dbConnect from "@/lib/db";
 import { NextResponse } from 'next/server';
+import User from "@/models/UserModel";
 
-export async function GET() {
+export async function GET(req) {
   try {
-    // Get the authenticated user ID from Clerk
-    const { userId } = auth();
+    const { searchParams } = new URL(req.url);
+    let userId = searchParams.get("userId");
+
+    if (!userId) {
+      const authData = await auth();
+      userId = authData?.userId;
+    }
     
     if (!userId) {
       return NextResponse.json(
@@ -15,10 +20,9 @@ export async function GET() {
       );
     }
 
-    const { db } = await dbConnect();
-    const collection = db.collection('users');
+    await dbConnect();
     
-    const userData = await collection.findOne({ userId });
+    const userData = await User.findOne({ userId });
     
     if (!userData) {
       return NextResponse.json(
@@ -27,24 +31,9 @@ export async function GET() {
       );
     }
 
-    // Check if user has GitHub summary data
-    if (!userData.summary) {
-      return NextResponse.json(
-        { message: 'GitHub summary not found for this user' },
-        { status: 404 }
-      );
-    }
-
-    // Return only the GitHub summary
-    const responseData = {
-      githubUsername: userData.githubUsername,
-      summary: userData.summary
-    };
-
-    return NextResponse.json(responseData);
+    return NextResponse.json(userData);
 
   } catch (error) {
-    console.error('Error fetching GitHub summary:', error);
     return NextResponse.json(
       { message: 'Internal server error' },
       { status: 500 }

@@ -31,7 +31,6 @@ const CareerRoadmaps = () => {
 
   const [completedWeeks, setCompletedWeeks] = useState(new Set());
 
-  // Load completed weeks from database - FAST single API call
   useEffect(() => {
     const loadCompletedWeeks = async () => {
       if (!user?.id) return;
@@ -44,14 +43,12 @@ const CareerRoadmaps = () => {
           setCompletedWeeks(completedSet);
         }
       } catch (error) {
-        console.error('Error loading completed weeks:', error);
       }
     };
 
     loadCompletedWeeks();
   }, [user?.id]);
 
-  // Simple functions to replace Zustand store
   const getWeekProgress = (roadmap, weekIndex) => {
     return { completed: completedWeeks.has(`${roadmap}-${weekIndex}`) };
   };
@@ -83,12 +80,6 @@ const CareerRoadmaps = () => {
     };
   };
 
-  // Load user progress from database
-  // Removed loadUserProgress - no longer needed
-
-  // Removed saveProgressToDatabase - no longer needed
-
-  // Get progress data
   const roadmapProgress = getRoadmapProgress(
     selectedRoadmap.role,
     selectedRoadmap.weeks.length
@@ -108,31 +99,18 @@ const CareerRoadmaps = () => {
     }
   };
 
-  // Handle completion toggle with database save
   const handleToggleCompletion = async (weekIndex) => {
-    if (isUpdating) return; // Prevent double-clicks during save
+    if (isUpdating) return; 
 
-    console.log("Toggling week completion:", weekIndex + 1);
-
-    // Check if user is trying to complete (we'll determine from mock score)
-    const willBeCompleted = true; // Always check mock score first
-
-    // Always check mock score before allowing completion
     try {
       const response = await fetch(
         `/api/get-all-progress?roadmap=${selectedRoadmap.role}&weekId=${
           weekIndex + 1
         }`
       );
-      console.log(
-        `🔍 Checking mock score for roadmap "${selectedRoadmap.role}" week ${
-          weekIndex + 1
-        }`
-      );
 
       if (response.ok) {
         const data = await response.json();
-        console.log(`📊 API Response:`, data);
         const mockScore = data.mockScore;
 
         if (!mockScore || mockScore < 90) {
@@ -145,10 +123,9 @@ const CareerRoadmaps = () => {
               duration: 4000,
             }
           );
-          return; // Don't proceed with completion
+          return; 
         }
 
-        // If we reach here, user has >= 90% score, so mark as complete
         toggleWeekCompletion(selectedRoadmap.role, weekIndex);
       } else {
         toast.error("You need to take the mock interview first!", {
@@ -159,20 +136,15 @@ const CareerRoadmaps = () => {
         return;
       }
     } catch (error) {
-      console.error("Error fetching mock score:", error);
       toast.error("Unable to verify your score. Please try again.", {
         duration: 4000,
       });
       return;
     }
 
-    // No need to save to database - completion is determined by mock score
-
-    // Animation
     setAnimatingWeek(weekIndex);
     setTimeout(() => setAnimatingWeek(null), 600);
 
-    // Check if roadmap completed
     const newProgress = getRoadmapProgress(
       selectedRoadmap.role,
       selectedRoadmap.weeks.length

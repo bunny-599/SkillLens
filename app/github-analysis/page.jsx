@@ -25,33 +25,31 @@ const GitHubAnalysisPage = () => {
   const [loading, setLoading] = useState(false);
   const [existingSummary, setExistingSummary] = useState(null);
   const [loadingSummary, setLoadingSummary] = useState(true);
-
   const [aiAnalysis, setAiAnalysis] = useState(null);
   const [loadingAI, setLoadingAI] = useState(false);
 
-const getAIAnalysis = async () => {
-  if (!existingSummary) return;
+  const getAIAnalysis = async () => {
+    if (!existingSummary) return;
 
-  setLoadingAI(true);
-  try {
-    const res = await fetch(`/api/github-analysis?username=${existingSummary.githubUsername}&role=${selectedRole}&analyze=true`);
-    const data = await res.json();
+    setLoadingAI(true);
+    setAiAnalysis(null);
+    try {
+      const res = await fetch(`/api/github-analysis?username=${existingSummary.githubUsername}&role=${selectedRole}&analyze=true`);
+      const data = await res.json();
 
-    if (data.analysis) {
-      setAiAnalysis(data.analysis);
-      // Save to localStorage
-      localStorage.setItem("ai_analysis", JSON.stringify(data.analysis));
+      if (data.analysis) {
+        setAiAnalysis(data.analysis);
+        localStorage.setItem(`ai_analysis_${selectedRole}`, JSON.stringify(data.analysis));
+      } else if (data.error) {
+        alert(data.error);
+      }
+    } catch (error) {
+      alert("Failed to get AI analysis. Please try again.");
+    } finally {
+      setLoadingAI(false);
     }
-  } catch (error) {
-    console.error("AI analysis failed:", error);
-    alert("Failed to get AI analysis. Please try again.");
-  } finally {
-    setLoadingAI(false);
-  }
-};
+  };
 
-
-  // Load stored preferences
   useEffect(() => {
     const storedUsername = localStorage.getItem("github_username");
     const storedRole = localStorage.getItem("target_role");
@@ -59,47 +57,48 @@ const getAIAnalysis = async () => {
     if (storedRole) setSelectedRole(storedRole);
   }, []);
 
-  // Load existing summary from database
-// Update your existing useEffect that loads existing summary
-useEffect(() => {
-  const loadExistingSummary = async () => {
-    setLoadingSummary(true);
-    try {
-      const response = await fetch("/api/get-user-summary");
-      if (response.ok) {
-        const data = await response.json();
-        if (data.summary && data.summary.s && data.summary.r) {
-          setExistingSummary({
-            username: data.summary.u,
-            summary: data.summary.s,
-            repos: data.summary.r,
-            githubUsername: data.githubUsername,
-          });
-          // Auto-fill username if we have it
-          if (data.githubUsername && !username) {
-            setUsername(data.githubUsername);
-          }
+  useEffect(() => {
+    if (selectedRole) {
+      const storedAIAnalysis = localStorage.getItem(`ai_analysis_${selectedRole}`);
+      if (storedAIAnalysis) {
+        try {
+          setAiAnalysis(JSON.parse(storedAIAnalysis));
+        } catch (error) {
+          setAiAnalysis(null);
+        }
+      } else {
+        setAiAnalysis(null);
+      }
+    }
+  }, [selectedRole]);
 
-          // Load and show AI analysis from localStorage
-          const storedAIAnalysis = localStorage.getItem("ai_analysis");
-          if (storedAIAnalysis) {
-            try {
-              setAiAnalysis(JSON.parse(storedAIAnalysis));
-            } catch (error) {
-              console.error("Error parsing AI analysis:", error);
+  useEffect(() => {
+    const loadExistingSummary = async () => {
+      setLoadingSummary(true);
+      try {
+        const response = await fetch("/api/get-user-summary");
+        if (response.ok) {
+          const data = await response.json();
+          if (data.summary && data.summary.s && data.summary.r) {
+            setExistingSummary({
+              username: data.summary.u,
+              summary: data.summary.s,
+              repos: data.summary.r,
+              githubUsername: data.githubUsername,
+            });
+            if (data.githubUsername && !username) {
+              setUsername(data.githubUsername);
             }
           }
         }
+      } catch (error) {
+      } finally {
+        setLoadingSummary(false);
       }
-    } catch (error) {
-      console.error("Error loading existing summary:", error);
-    } finally {
-      setLoadingSummary(false);
-    }
-  };
+    };
 
-  loadExistingSummary();
-}, []);
+    loadExistingSummary();
+  }, []);
 
   const handleAnalyze = async () => {
     if (!username.trim()) return;
@@ -108,19 +107,19 @@ useEffect(() => {
     setLoading(true);
 
     try {
-      const res = await fetch(
-        `/api/github-analysis?username=${username}&save=true`
-      );
+      const apiUrl = `/api/github-analysis?username=${username}&save=true`;
+      const res = await fetch(apiUrl);
       const data = await res.json();
-      // Support both: summary at top-level or wrapped in a 'summary' property
-      const result = data?.result;
-      const summary =
-        result?.summary && result.summary.s && result.summary.r
-          ? result.summary
-          : result;
 
-      if (!summary || !summary.s || !summary.r)
-        throw new Error("No summary found");
+      if (!res.ok) {
+        throw new Error(data.error || "Analysis failed");
+      }
+
+      const summary = data?.result;
+
+      if (!summary || !summary.s || !summary.r) {
+        throw new Error("No summary found in response");
+      }
 
       setAnalysis({
         username: summary.u,
@@ -128,7 +127,6 @@ useEffect(() => {
         repos: summary.r,
       });
 
-      // Refresh existing summary after new analysis
       setExistingSummary({
         username: summary.u,
         summary: summary.s,
@@ -136,8 +134,7 @@ useEffect(() => {
         githubUsername: username,
       });
     } catch (err) {
-      console.error("Analysis failed:", err);
-      alert("Failed to analyze GitHub profile. Please check the username.");
+      alert(`Analysis failed: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -168,18 +165,15 @@ useEffect(() => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-white px-4 py-10 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto space-y-8">
-        {/* Header */}
         <div className="text-center">
           <h1 className="text-4xl font-bold bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent mb-2">
             GitHub Profile Analyzer
           </h1>
           <p className="text-gray-300 text-lg">
-            Get intelligent insights about your GitHub profile and coding
-            journey
+            Get intelligent insights about your GitHub profile and coding journey
           </p>
         </div>
 
-        {/* Analysis Form */}
         <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-2xl border border-gray-700/50 p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
@@ -234,7 +228,6 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* Existing Summary Section */}
         {loadingSummary ? (
           <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-2xl border border-gray-700/50 p-8">
             <div className="flex items-center justify-center space-x-3">
@@ -246,7 +239,6 @@ useEffect(() => {
           </div>
         ) : existingSummary ? (
           <div className="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-2xl border border-gray-700/50 overflow-hidden">
-            {/* Header */}
             <div className="bg-gradient-to-r from-blue-900/30 to-purple-900/30 p-6 border-b border-gray-700/50">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
@@ -272,7 +264,6 @@ useEffect(() => {
               </div>
             </div>
 
-            {/* Stats Grid */}
             <div className="p-6">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                 <div className="bg-gray-700/30 p-4 rounded-lg border border-gray-600/30">
@@ -313,7 +304,6 @@ useEffect(() => {
                 </div>
               </div>
 
-              {/* Languages */}
               <div className="mb-6">
                 <h3 className="text-lg font-semibold text-white mb-3 flex items-center">
                   <Code className="h-5 w-5 mr-2 text-cyan-400" />
@@ -333,7 +323,6 @@ useEffect(() => {
                 </div>
               </div>
 
-              {/* Recent Projects */}
               <div>
                 <h3 className="text-lg font-semibold text-white mb-3 flex items-center">
                   <TrendingUp className="h-5 w-5 mr-2 text-green-400" />
@@ -367,14 +356,12 @@ useEffect(() => {
                 No Profile Summary Found
               </h3>
               <p className="text-gray-400 mb-4">
-                Analyze your GitHub profile above to get detailed insights and
-                save your summary.
+                Analyze your GitHub profile above to get detailed insights and save your summary.
               </p>
             </div>
           )
         )}
 
-        {/* New Analysis Results */}
         {analysis && (
           <div className="bg-gradient-to-r from-green-900/20 to-blue-900/20 border border-green-500/30 rounded-xl p-6">
             <div className="flex items-center space-x-2 mb-4">
@@ -386,8 +373,7 @@ useEffect(() => {
               </h3>
             </div>
             <p className="text-green-300">
-              Your GitHub profile has been analyzed and saved. The summary above
-              has been updated with your latest data.
+              Your GitHub profile has been analyzed and saved. The summary above has been updated with your latest data.
             </p>
           </div>
         )}
@@ -426,7 +412,6 @@ useEffect(() => {
 
             {aiAnalysis ? (
               <div className="p-6 space-y-6">
-                {/* Issues Section */}
                 <div>
                   <h3 className="text-lg font-semibold text-white mb-3 flex items-center">
                     <AlertTriangle className="h-5 w-5 mr-2 text-red-400" />
@@ -444,7 +429,6 @@ useEffect(() => {
                   </div>
                 </div>
 
-                {/* Tips Section */}
                 <div>
                   <h3 className="text-lg font-semibold text-white mb-3 flex items-center">
                     <Lightbulb className="h-5 w-5 mr-2 text-yellow-400" />

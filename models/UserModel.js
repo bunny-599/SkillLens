@@ -1,14 +1,13 @@
 import mongoose from "mongoose";
 
 const userSchema = new mongoose.Schema({
-  userId: { type: String, required: true, unique: true }, // Clerk User ID
+  userId: { type: String, required: true, unique: true },
   
-  githubUsername: { type: String }, // For regenerating summaries later
+  githubUsername: { type: String },
   
   summary: { type: Object, default: {} },
   interviewScores: { type: [Number], default: [] },
   
-  // Simple Map structure for roadmap progress
   roadmapProgress: {
     type: Map,
     of: mongoose.Schema.Types.Mixed,
