@@ -17,6 +17,7 @@ import {
   ChevronUp,
   ExternalLink,
   Calendar,
+  Youtube,
 } from "lucide-react";
 import { careerRoadmaps } from "@/data/mockData";
 
@@ -484,22 +485,35 @@ const CareerRoadmaps = () => {
                                       (resource, resourceIndex) => (
                                         <div
                                           key={resourceIndex}
-                                          className="flex items-center space-x-2"
+                                          className="flex items-center justify-between"
                                         >
-                                          <div className="w-2 h-2 bg-green-400 rounded-full flex-shrink-0" />
-                                          {typeof resource === 'object' && resource.url ? (
+                                          <div className="flex items-center space-x-2">
+                                            <div className="w-2 h-2 bg-green-400 rounded-full flex-shrink-0" />
+                                            {typeof resource === 'object' && resource.url ? (
+                                              <a
+                                                href={resource.url}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="text-gray-300 text-sm hover:text-green-400 cursor-pointer transition-colors hover:underline"
+                                              >
+                                                {resource.name}
+                                              </a>
+                                            ) : (
+                                              <span className="text-gray-300 text-sm">
+                                                {typeof resource === 'string' ? resource : resource.name}
+                                              </span>
+                                            )}
+                                          </div>
+                                          {resource.ytlink && (
                                             <a
-                                              href={resource.url}
+                                              href={resource.ytlink}
                                               target="_blank"
                                               rel="noopener noreferrer"
-                                              className="text-gray-300 text-sm hover:text-green-400 cursor-pointer transition-colors hover:underline"
+                                              className="text-red-500 hover:text-red-400 transition-colors"
+                                              title="YouTube Resource"
                                             >
-                                              {resource.name}
+                                              <Youtube className="w-5 h-5" />
                                             </a>
-                                          ) : (
-                                            <span className="text-gray-300 text-sm">
-                                              {typeof resource === 'string' ? resource : resource.name}
-                                            </span>
                                           )}
                                         </div>
                                       )
